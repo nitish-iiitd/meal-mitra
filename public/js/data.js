@@ -1,0 +1,276 @@
+// data.js — MealMitra seed data + suggestion engine (Indian household)
+// Exposes window.MM (data + helpers). No framework dependencies.
+
+// ── Family members ────────────────────────────────────────────
+const MEMBERS = [
+  { id: 'asha',   name: 'Asha',   role: 'Mom',     color: '#C4622D', active: true },
+  { id: 'ravi',   name: 'Ravi',   role: 'Dad',     color: '#3E5C3A', active: true },
+  { id: 'nitish', name: 'Nitish', role: 'Son',     color: '#B07A2E', active: true },
+  { id: 'nikita', name: 'Nikita', role: 'Daughter',color: '#9C5A3C', active: true },
+  { id: 'aarav',  name: 'Aarav',  role: 'Kid (6)', color: '#5C7A54', active: true },
+];
+
+// ── Meal items ────────────────────────────────────────────────
+const MEALS = [
+  // Breakfast (complete)
+  { id: 'poha',    name: 'Poha',          types: ['breakfast'], itemType: 'complete', effort: 'quick',  tags: ['Veg','Light','Quick'], last: 1,  desc: 'Flattened rice with onions, peas & a squeeze of lemon.' },
+  { id: 'idli',    name: 'Idli Sambar',   types: ['breakfast'], itemType: 'complete', effort: 'medium', tags: ['Veg','Light','Protein'], last: 9, desc: 'Steamed rice cakes with sambar & coconut chutney.' },
+  { id: 'upma',    name: 'Upma',          types: ['breakfast'], itemType: 'complete', effort: 'quick',  tags: ['Veg','Light','Quick'], last: 4, desc: 'Savoury semolina with veggies & curry leaves.' },
+  { id: 'aloopar', name: 'Aloo Paratha',  types: ['breakfast'], itemType: 'complete', effort: 'heavy',  tags: ['Veg','Heavy','Kids'], last: 12, desc: 'Stuffed potato flatbread with butter & curd.' },
+  { id: 'chilla',  name: 'Besan Chilla',  types: ['breakfast'], itemType: 'complete', effort: 'quick',  tags: ['Veg','Healthy','Protein','Quick'], last: 6, desc: 'Spiced gram-flour pancakes, light & filling.' },
+  { id: 'dosa',    name: 'Masala Dosa',   types: ['breakfast'], itemType: 'complete', effort: 'medium', tags: ['Veg'], last: 15, desc: 'Crisp dosa with spiced potato filling.' },
+
+  // Snacks (complete)
+  { id: 'dhokla',  name: 'Dhokla',        types: ['snacks'], itemType: 'complete', effort: 'medium', tags: ['Veg','Light','Healthy'], last: 11, desc: 'Steamed savoury cakes, soft and tangy.' },
+  { id: 'bhel',    name: 'Bhel Puri',     types: ['snacks'], itemType: 'complete', effort: 'quick',  tags: ['Veg','Light','Quick'], last: 7, desc: 'Puffed rice tossed with chutneys & sev.' },
+  { id: 'samosa',  name: 'Samosa',        types: ['snacks'], itemType: 'complete', effort: 'heavy',  tags: ['Veg','Heavy'], last: 5, desc: 'Crisp pastry with spiced potato filling.' },
+  { id: 'maggi',   name: 'Masala Maggi',  types: ['snacks'], itemType: 'complete', effort: 'quick',  tags: ['Kids','Quick'], last: 2, desc: '2-minute noodles, the kids\u2019 favourite.' },
+  { id: 'pavbhaji',name: 'Pav Bhaji',     types: ['snacks','dinner'], itemType: 'complete', effort: 'medium', tags: ['Veg','Kids','Heavy'], last: 14, desc: 'Spiced veg mash with buttered pav.' },
+
+  // Lunch / Dinner — complete
+  { id: 'khichdi', name: 'Khichdi',       types: ['lunch','dinner'], itemType: 'complete', effort: 'quick',  tags: ['Veg','Light','Healthy','Quick'], last: 8, desc: 'One-pot rice & lentils, comforting and light.' },
+  { id: 'pulao',   name: 'Veg Pulao',     types: ['lunch','dinner'], itemType: 'complete', effort: 'medium', tags: ['Veg'], last: 13, desc: 'Fragrant rice cooked with vegetables & whole spices.' },
+
+  // Lunch / Dinner — main dishes
+  { id: 'rajma',   name: 'Rajma',         types: ['lunch','dinner'], itemType: 'main', effort: 'medium', tags: ['Veg','Protein'], last: 8,
+    serveWith: [{ id: 'rice', score: 5 }, { id: 'roti', score: 2 }], sides: ['salad'], desc: 'Kidney beans in a rich tomato-onion gravy.' },
+  { id: 'dal',     name: 'Dal Tadka',     types: ['lunch','dinner'], itemType: 'main', effort: 'quick',  tags: ['Veg','Protein','Quick'], last: 2,
+    serveWith: [{ id: 'rice', score: 4 }, { id: 'roti', score: 4 }], sides: ['salad','papad'], desc: 'Yellow lentils finished with a sizzling tempering.' },
+  { id: 'chole',   name: 'Chole',         types: ['lunch','dinner'], itemType: 'main', effort: 'medium', tags: ['Veg','Protein','Spicy'], last: 16,
+    serveWith: [{ id: 'rice', score: 4 }, { id: 'roti', score: 4 }], sides: ['salad','pickle'], desc: 'Spiced chickpea curry, hearty and bold.' },
+  { id: 'bhindi',  name: 'Bhindi Sabzi',  types: ['lunch','dinner'], itemType: 'main', effort: 'medium', tags: ['Veg'], last: 10,
+    serveWith: [{ id: 'roti', score: 5 }, { id: 'rice', score: 2 }], sides: ['curd'], desc: 'Stir-fried okra with onions & spices.' },
+  { id: 'paneer',  name: 'Paneer Butter Masala', types: ['lunch','dinner'], itemType: 'main', effort: 'heavy', tags: ['Veg','Kids'], last: 6,
+    serveWith: [{ id: 'roti', score: 5 }, { id: 'rice', score: 3 }], sides: ['salad'], desc: 'Cottage cheese in a creamy tomato gravy.' },
+  { id: 'kadhi',   name: 'Kadhi',         types: ['lunch','dinner'], itemType: 'main', effort: 'medium', tags: ['Veg'], last: 18,
+    serveWith: [{ id: 'rice', score: 5 }, { id: 'roti', score: 1 }], sides: ['papad'], desc: 'Yogurt-gram flour curry with soft pakoras.' },
+  { id: 'aloogobi',name: 'Aloo Gobi',     types: ['lunch','dinner'], itemType: 'main', effort: 'quick', tags: ['Veg','Quick'], last: 5,
+    serveWith: [{ id: 'roti', score: 5 }, { id: 'rice', score: 2 }], sides: ['curd'], desc: 'Dry potato & cauliflower stir-fry.' },
+  { id: 'palak',   name: 'Palak Paneer',  types: ['lunch','dinner'], itemType: 'main', effort: 'medium', tags: ['Veg','Healthy','Protein'], last: 20,
+    serveWith: [{ id: 'roti', score: 5 }, { id: 'rice', score: 3 }], sides: ['salad'], desc: 'Cottage cheese in a smooth spinach gravy.' },
+  { id: 'eggcurry',name: 'Egg Curry',     types: ['lunch','dinner'], itemType: 'main', effort: 'medium', tags: ['Non-veg','Protein'], last: 9,
+    serveWith: [{ id: 'rice', score: 5 }, { id: 'roti', score: 3 }], sides: ['salad'], desc: 'Boiled eggs simmered in spiced onion gravy.' },
+
+  // Regular items — staples
+  { id: 'rice',    name: 'Rice',          types: ['lunch','dinner'], itemType: 'staple', regular: true, defaultOn: true, effort: 'quick', tags: ['Veg'], last: 1, desc: 'Steamed basmati rice.' },
+  { id: 'roti',    name: 'Roti',          types: ['lunch','dinner'], itemType: 'staple', regular: true, defaultOn: true, effort: 'medium', tags: ['Veg'], last: 1, desc: 'Soft whole-wheat flatbread.' },
+
+  // Regular items — sides
+  { id: 'salad',   name: 'Salad',         types: ['lunch','dinner'], itemType: 'side', regular: true, defaultOn: true, effort: 'quick', tags: ['Veg','Healthy'], last: 1, desc: 'Onion, cucumber & tomato with lemon.' },
+  { id: 'curd',    name: 'Curd',          types: ['lunch','dinner'], itemType: 'side', regular: true, defaultOn: false, effort: 'quick', tags: ['Veg'], last: 2, desc: 'Fresh set yogurt.' },
+  { id: 'papad',   name: 'Papad',         types: ['lunch','dinner'], itemType: 'side', regular: true, defaultOn: false, effort: 'quick', tags: ['Veg'], last: 3, desc: 'Roasted lentil crisp.' },
+  { id: 'pickle',  name: 'Pickle',        types: ['lunch','dinner'], itemType: 'side', regular: true, defaultOn: false, effort: 'quick', tags: ['Veg','Spicy'], last: 1, desc: 'Tangy mango pickle.' },
+];
+
+// ── Preferences  meal -> member -> level (love|okay|avoid|cannot) ──
+const PREF_OVERRIDES = {
+  poha:    { asha:'love',  nikita:'avoid', aarav:'avoid' },
+  idli:    { asha:'okay',  ravi:'love',  nitish:'love', nikita:'love', aarav:'love' },
+  upma:    { asha:'avoid', nikita:'avoid', aarav:'cannot' },
+  aloopar: { asha:'okay',  ravi:'love',  nitish:'love', nikita:'love', aarav:'love' },
+  chilla:  { asha:'love',  aarav:'avoid' },
+  dosa:    { ravi:'love',  aarav:'love', nikita:'love' },
+  dhokla:  { asha:'love',  aarav:'avoid' },
+  bhel:    { nitish:'love',nikita:'love' },
+  samosa:  { asha:'okay',  ravi:'love',  nitish:'love', nikita:'love', aarav:'love' },
+  maggi:   { asha:'avoid', ravi:'avoid', nitish:'love', nikita:'love', aarav:'love' },
+  pavbhaji:{ asha:'love',  ravi:'love',  nitish:'love', nikita:'love', aarav:'love' },
+  khichdi: { asha:'love',  ravi:'okay',  aarav:'okay' },
+  pulao:   { asha:'okay',  nikita:'love' },
+  rajma:   { asha:'love',  ravi:'love',  nitish:'okay', nikita:'love', aarav:'okay' },
+  dal:     { asha:'okay',  ravi:'okay',  nitish:'okay', nikita:'okay', aarav:'okay' },
+  chole:   { asha:'love',  ravi:'love',  nitish:'love', nikita:'okay', aarav:'avoid' },
+  bhindi:  { asha:'okay',  ravi:'love',  nitish:'okay', nikita:'avoid', aarav:'avoid' },
+  paneer:  { asha:'love',  ravi:'love',  nitish:'love', nikita:'love', aarav:'love' },
+  kadhi:   { asha:'okay',  ravi:'okay',  nitish:'love', nikita:'okay', aarav:'avoid' },
+  aloogobi:{ asha:'okay',  ravi:'okay',  nikita:'okay', aarav:'okay' },
+  palak:   { asha:'love',  ravi:'love',  nitish:'okay', nikita:'love', aarav:'cannot' },
+  eggcurry:{ asha:'cannot',ravi:'love',  nitish:'love', nikita:'cannot', aarav:'okay' },
+  rice:    { asha:'avoid' },
+  roti:    {},
+  salad:   { aarav:'avoid' },
+  curd:    {},
+  papad:   { aarav:'love' },
+  pickle:  { aarav:'cannot' },
+};
+
+// ── Scoring constants ─────────────────────────────────────────
+const PREF_SCORE = { love: 3, okay: 1, avoid: -2, cannot: -999 };
+const WEIGHT = { main: 1.0, staple: 0.5, side: 0.3 };
+
+function recentPenalty(days) {
+  if (days == null) return 1;
+  if (days === 0) return -10;
+  if (days <= 1) return -5;
+  if (days <= 3) return -3;
+  if (days <= 7) return -1;
+  return 2;
+}
+
+const byId = id => MEALS.find(m => m.id === id);
+const memberById = id => MEMBERS.find(m => m.id === id);
+function prefOf(mealId, memberId) {
+  const o = PREF_OVERRIDES[mealId];
+  if (o && o[memberId]) return o[memberId];
+  return 'okay';
+}
+
+function scoreComponent(mealId, presentIds) {
+  const levels = {};
+  let sum = 0, blocked = false;
+  presentIds.forEach(mid => {
+    const lvl = prefOf(mealId, mid);
+    levels[mid] = lvl;
+    if (lvl === 'cannot') blocked = true;
+    else sum += PREF_SCORE[lvl];
+  });
+  return { score: sum, blocked, levels };
+}
+
+function pickStaple(main, presentIds) {
+  if (!main.serveWith) return null;
+  let best = null;
+  main.serveWith.forEach(({ id, score }) => {
+    const cs = scoreComponent(id, presentIds);
+    if (cs.blocked) return;
+    const total = cs.score * WEIGHT.staple + score;
+    if (!best || total > best.total) best = { id, compat: score, ...cs, total };
+  });
+  return best;
+}
+
+function pickSides(main, presentIds) {
+  if (!main.sides) return [];
+  return main.sides
+    .map(id => ({ id, ...scoreComponent(id, presentIds) }))
+    .filter(s => !s.blocked);
+}
+
+function buildSuggestion(meal, presentIds, filters) {
+  const mainC = scoreComponent(meal.id, presentIds);
+  if (mainC.blocked) return null;
+
+  let score = mainC.score * WEIGHT.main;
+  let parts = [{ id: meal.id, name: meal.name, levels: mainC.levels, role: 'main' }];
+  let allLevels = Object.values(mainC.levels);
+  let staple = null, sides = [];
+
+  if (meal.itemType === 'main') {
+    staple = pickStaple(meal, presentIds);
+    if (staple) {
+      score += staple.score * WEIGHT.staple + staple.compat;
+      const s = byId(staple.id);
+      parts.push({ id: s.id, name: s.name, levels: staple.levels, role: 'staple' });
+      allLevels = allLevels.concat(Object.values(staple.levels));
+    }
+    sides = pickSides(meal, presentIds);
+    sides.forEach(sd => {
+      score += sd.score * WEIGHT.side;
+      const s = byId(sd.id);
+      parts.push({ id: s.id, name: s.name, levels: sd.levels, role: 'side' });
+      allLevels = allLevels.concat(Object.values(sd.levels));
+    });
+  }
+
+  const penalty = recentPenalty(meal.last);
+  score += penalty;
+
+  let filterBonus = 0;
+  if (filters.effort && meal.effort === filters.effort) filterBonus += 2;
+  (filters.tags || []).forEach(t => { if (meal.tags.includes(t)) filterBonus += 1; });
+  score += filterBonus;
+
+  if (filters.tags && filters.tags.includes('Veg') && meal.tags.includes('Non-veg')) return null;
+  if (filters.effort && meal.effort !== filters.effort && filters.effortStrict) return null;
+
+  const noConflict = !allLevels.some(l => l === 'avoid' || l === 'cannot');
+  if (filters.noConflictOnly && !noConflict) return null;
+  if (noConflict) score += 2;
+
+  const likeCount = Object.values(mainC.levels).filter(l => l === 'love').length;
+  const okPlus = Object.values(mainC.levels).filter(l => l === 'love' || l === 'okay').length;
+
+  return {
+    id: meal.id, meal,
+    displayName: parts.map(p => p.name).join(' + '),
+    parts, main: parts[0],
+    staple: staple ? byId(staple.id) : null,
+    sides: sides.map(s => byId(s.id)),
+    score: Math.round(score * 10) / 10,
+    baseScore: mainC.score, penalty, filterBonus, noConflict,
+    likeCount, okPlus, present: presentIds.length,
+    effort: meal.effort, tags: meal.tags, last: meal.last, levels: mainC.levels,
+  };
+}
+
+function reasonFor(s) {
+  const bits = [];
+  if (s.likeCount === s.present && s.present > 1) bits.push(`All ${s.present} love it`);
+  else if (s.likeCount > 0) bits.push(`${s.likeCount} of ${s.present} love it`);
+  else if (s.okPlus === s.present) bits.push(`Everyone\u2019s okay with it`);
+
+  if (s.noConflict) bits.push('no one objects');
+
+  if (s.last == null) bits.push('never cooked');
+  else if (s.last >= 8) bits.push(`not cooked in ${s.last} days`);
+  else if (s.last <= 1) bits.push(`cooked ${s.last === 0 ? 'today' : 'yesterday'}`);
+
+  if (s.effort === 'quick') bits.push('quick to make');
+  return bits.slice(0, 3).map((b, i) => i === 0 ? b.charAt(0).toUpperCase() + b.slice(1) : b).join(' \u00b7 ') + '.';
+}
+
+function suggest({ mealType, presentIds, filters = {}, limit = 5 }) {
+  if (!presentIds || !presentIds.length) return [];
+  const single = mealType === 'breakfast' || mealType === 'snacks';
+  const candidates = MEALS.filter(m =>
+    m.types.includes(mealType) && !m.regular &&
+    (single ? m.itemType === 'complete' : (m.itemType === 'main' || m.itemType === 'complete'))
+  );
+  const out = candidates
+    .map(m => buildSuggestion(m, presentIds, filters))
+    .filter(Boolean)
+    .sort((a, b) =>
+      b.score - a.score ||
+      (b.last ?? 99) - (a.last ?? 99) ||
+      a.displayName.localeCompare(b.displayName)
+    );
+  out.forEach((s, i) => { s.rank = i + 1; s.reason = reasonFor(s); });
+  return out.slice(0, limit);
+}
+
+const HISTORY = [
+  { id: 'h1', mealId: 'dal',    type: 'lunch',     daysAgo: 1, members: ['asha','ravi','nitish','nikita','aarav'], display: 'Dal Tadka + Rice + Salad' },
+  { id: 'h2', mealId: 'poha',   type: 'breakfast', daysAgo: 1, members: ['asha','ravi','nitish'], display: 'Poha' },
+  { id: 'h3', mealId: 'maggi',  type: 'snacks',    daysAgo: 2, members: ['nitish','nikita','aarav'], display: 'Masala Maggi' },
+  { id: 'h4', mealId: 'aloogobi',type:'dinner',    daysAgo: 5, members: ['asha','ravi','nikita'], display: 'Aloo Gobi + Roti + Curd' },
+  { id: 'h5', mealId: 'paneer', type: 'dinner',    daysAgo: 6, members: ['asha','ravi','nitish','nikita','aarav'], display: 'Paneer Butter Masala + Roti' },
+  { id: 'h6', mealId: 'idli',   type: 'breakfast', daysAgo: 9, members: ['asha','ravi','nitish','nikita','aarav'], display: 'Idli Sambar' },
+];
+
+const MEAL_TYPES = [
+  { id: 'breakfast', label: 'Breakfast', hint: 'Morning', icon: 'sunrise' },
+  { id: 'lunch',     label: 'Lunch',     hint: 'Midday',  icon: 'sun' },
+  { id: 'snacks',    label: 'Snacks',    hint: 'Evening', icon: 'cup' },
+  { id: 'dinner',    label: 'Dinner',    hint: 'Night',   icon: 'moon' },
+];
+
+const FILTERS = [
+  { id: 'quick',     label: 'Quick',        kind: 'effort', value: 'quick' },
+  { id: 'healthy',   label: 'Healthy',      kind: 'tag',    value: 'Healthy' },
+  { id: 'light',     label: 'Light',        kind: 'tag',    value: 'Light' },
+  { id: 'kids',      label: 'Kids-friendly',kind: 'tag',    value: 'Kids' },
+  { id: 'veg',       label: 'Veg only',     kind: 'tag',    value: 'Veg' },
+  { id: 'noconflict',label: 'No-conflict',  kind: 'special',value: 'noConflictOnly' },
+];
+
+const PREF_META = {
+  love:   { label: 'Loves it',   short: 'Loves',  color: '#3E7C4F', score: '+3' },
+  okay:   { label: 'Okay',       short: 'Okay',   color: '#C99A3A', score: '+1' },
+  avoid:  { label: 'Avoids',     short: 'Avoids', color: '#C0563C', score: '\u22122' },
+  cannot: { label: 'Cannot eat', short: 'Can\u2019t', color: '#8E2C1C', score: 'block' },
+};
+
+window.MM = {
+  MEMBERS, MEALS, MEAL_TYPES, FILTERS, HISTORY, PREF_META, PREF_OVERRIDES,
+  suggest, reasonFor, prefOf, memberById, byId, buildSuggestion, scoreComponent,
+};
