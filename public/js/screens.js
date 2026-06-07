@@ -119,17 +119,12 @@
   function home() {
     const S = window.State;
     const active = S.members.filter(m => m.active);
-    const greeting = S.mealType === 'breakfast' ? 'Good morning' : S.mealType === 'dinner' ? 'Good evening' : 'Hello';
-    const firstName = (active[0] && active[0].name) || '';
+    const hr = new Date().getHours();
+    const greeting = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
     const canGo = S.present.length > 0;
     return '<div class="mm-wrap-narrow mm-fade">' +
-      '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px">' +
-        '<div style="flex-shrink:0"><div style="font-size:15px;font-weight:600;color:var(--ink-soft);white-space:nowrap">' + greeting + (firstName ? ', ' + esc(firstName) : '') + '</div>' +
-        '<div class="mm-eyebrow" style="margin-top:4px;white-space:nowrap">' + esc(S.familyName || 'Your Family') + '</div></div>' +
-        '<div style="width:46px;height:46px;border-radius:50%;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;position:relative">' +
-        icon('bell', { size: 20, stroke: 2 }) +
-        '<span style="position:absolute;top:11px;right:12px;width:8px;height:8px;border-radius:50%;background:var(--terra);border:1.5px solid var(--card)"></span></div>' +
-      '</div>' +
+      '<div><div style="font-size:15px;font-weight:600;color:var(--ink-soft)">' + greeting + '</div>' +
+        '<div class="mm-eyebrow" style="margin-top:4px">' + esc(S.familyName || 'Your Family') + '</div></div>' +
       '<h1 class="mm-h1" style="margin:26px 0 22px">What should we cook today?</h1>' +
       mealTypeGrid(S.mealType) +
       '<div style="margin-top:34px"><h2 class="mm-section-title">Who\u2019s eating?</h2>' +
@@ -332,8 +327,10 @@
   }
 
   // ── SETTINGS ────────────────────────────────────────────────
-  function settingsRow(ic, label, value, last) {
-    return '<div class="mm-set-row"' + (last ? ' style="border-bottom:none"' : '') + '>' +
+  function settingsRow(ic, label, value, opts) {
+    opts = opts || {};
+    const cls = 'mm-set-row' + (opts.last ? ' last' : '') + (opts.attrs ? ' clickable' : '');
+    return '<div class="' + cls + '"' + (opts.attrs || '') + '>' +
       '<div class="mm-set-ico">' + icon(ic, { size: 19, stroke: 2 }) + '</div>' +
       '<span style="flex:1;font-size:15px;font-weight:600;color:var(--ink)">' + label + '</span>' +
       (value ? '<span style="font-size:14px;color:var(--ink-soft);font-weight:500">' + value + '</span>' : '') +
@@ -352,9 +349,13 @@
         '<div style="font-size:13px;color:var(--ink-soft)">' + active + ' member' + (active === 1 ? '' : 's') + ' · saved on this device</div></div>' +
       '</div>' +
       '<div class="mm-label" style="margin:4px 4px 8px">Family</div>' +
-      '<div class="mm-card" style="padding:2px 16px;margin-bottom:20px">' + settingsRow('family', 'Family name', esc(fam)) + settingsRow('meals', 'Manage meals', dishes + ' dishes', true) + '</div>' +
+      '<div class="mm-card" style="padding:2px 16px;margin-bottom:20px">' +
+        settingsRow('family', 'Family name', esc(fam), { attrs: ' data-act="edit-family"' }) +
+        settingsRow('meals', 'Manage meals', dishes + ' dishes', { last: true, attrs: ' data-nav="meals"' }) + '</div>' +
       '<div class="mm-label" style="margin:4px 4px 8px">Suggestions</div>' +
-      '<div class="mm-card" style="padding:2px 16px;margin-bottom:20px">' + settingsRow('clock', 'Repeat avoidance', 'Balanced') + settingsRow('star', 'Preference weighting', 'Default') + settingsRow('bell', 'Daily reminder', 'Off', true) + '</div>' +
+      '<div class="mm-card" style="padding:2px 16px;margin-bottom:20px">' +
+        settingsRow('clock', 'Repeat avoidance', MM.TUNING.repeatAvoidance[S.settings.repeatAvoidance].label, { attrs: ' data-tune="repeatAvoidance"' }) +
+        settingsRow('star', 'Preference weighting', MM.TUNING.prefWeighting[S.settings.prefWeighting].label, { last: true, attrs: ' data-tune="prefWeighting"' }) + '</div>' +
       '<button class="mm-btn mm-btn-ghost full" data-act="reset" style="color:#8E2C1C">' + icon('trash', { size: 18, stroke: 2 }) + 'Reset family / start over</button>' +
       '<div style="text-align:center;font-size:12px;color:#B09B7E;margin-top:16px">MealMitra · v1.0 · web</div>' +
     '</div>';

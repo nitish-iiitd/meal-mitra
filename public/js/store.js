@@ -2,7 +2,7 @@
 // No backend, no login: the whole "database" (members, meals, preferences,
 // history) lives in localStorage so the app works instantly on any device.
 (function () {
-  const KEY = 'mealmitra:v2';
+  const KEY = 'mealmitra:v3';
 
   // Read the saved snapshot, or null on first run / unreadable storage.
   function load() {

@@ -50,7 +50,7 @@
   }
 
   // ════ MEAL EDITOR ══════════════════════════════════════════
-  const TAGS = ['Veg', 'Non-veg', 'Healthy', 'Light', 'Heavy', 'Quick', 'Kids', 'Spicy', 'Protein'];
+  const TAGS = ['Veg', 'Non-veg', 'Healthy', 'Light', 'Heavy', 'Quick', 'Kids', 'Spicy', 'Protein', 'Tiffin'];
   const STAPLES = ['rice', 'roti'], SIDES = ['salad', 'curd', 'papad', 'pickle'];
   let eD = null;
   function openMeal(meal) {
@@ -169,6 +169,39 @@
       '<button class="mm-btn mm-btn-primary lg full" data-cook-confirm="1" style="margin-top:18px">' + icon('check', { size: 21, stroke: 2.2 }) + 'Mark as cooked</button>';
   }
 
+  // ════ FAMILY NAME EDITOR ═══════════════════════════════════
+  let fnVal = '';
+  function openFamilyName() { fnVal = window.State.familyName || ''; open('Family name', familyNameBody(), ''); }
+  function familyNameBody() {
+    return '<div class="mm-field-label" style="margin-top:0">What’s your family called?</div>' +
+      '<input class="mm-input" id="mm-fam-input" value="' + esc(fnVal) + '" placeholder="e.g. Srivastava" style="font-family:var(--display);font-weight:600;font-size:19px">' +
+      '<div style="display:flex;gap:10px;margin-top:20px">' +
+        '<button class="mm-btn mm-btn-ghost" data-fam-cancel="1" style="flex:1">Cancel</button>' +
+        '<button class="mm-btn mm-btn-primary" data-fam-save="1" style="flex:2">' + icon('check', { size: 19, stroke: 2.2 }) + 'Save</button>' +
+      '</div>';
+  }
+
+  // ════ TUNING PICKER (repeat avoidance / preference weighting) ═
+  let tuneKey = null;
+  function openTuning(key) {
+    tuneKey = key;
+    open(key === 'repeatAvoidance' ? 'Repeat avoidance' : 'Preference weighting', tuningBody(), '');
+  }
+  function tuningBody() {
+    const meta = MM.TUNING[tuneKey];
+    const cur = window.State.settings[tuneKey];
+    const desc = tuneKey === 'repeatAvoidance'
+      ? 'How hard the app works to avoid meals you’ve cooked recently.'
+      : 'How strongly each person’s likes and dislikes sway the suggestions.';
+    const rows = Object.keys(meta).map(k => {
+      const o = meta[k], on = cur === k;
+      return '<button class="mm-pick-row' + (on ? ' on' : '') + '" data-tune-pick="' + k + '">' +
+        '<div><div class="mm-pick-title">' + esc(o.label) + '</div><div class="mm-pick-hint">' + esc(o.hint) + '</div></div>' +
+        '<span class="mm-pick-check">' + (on ? icon('check', { size: 18, stroke: 2.6, color: '#FFF8EE' }) : '') + '</span></button>';
+    }).join('');
+    return '<div style="font-size:13.5px;color:var(--ink-soft);margin-bottom:16px;line-height:1.5">' + desc + '</div>' + rows;
+  }
+
   // ════ RESET FAMILY ═════════════════════════════════════════
   const RESET_PHRASE = 'delete-family';
   function openReset() { open('Reset family', resetBody(), ''); }
@@ -248,6 +281,19 @@
       window.App.confirmCook(cSugg, cSel, note); close();
     });
 
+    // Family name editor
+    $doc.on('input', '#mm-modal #mm-fam-input', function () { fnVal = this.value; });
+    $doc.on('click', '#mm-modal [data-fam-cancel]', close);
+    $doc.on('click', '#mm-modal [data-fam-save]', function () {
+      if (!fnVal.trim()) return;
+      window.App.setFamilyName(fnVal.trim()); close();
+    });
+
+    // Tuning picker — pick one option, save & close
+    $doc.on('click', '#mm-modal [data-tune-pick]', function () {
+      window.App.setTuning(tuneKey, $(this).data('tune-pick')); close();
+    });
+
     // Reset family — gated behind typing the exact confirmation phrase
     $doc.on('input', '#mm-modal #mm-reset-confirm', function () {
       $('#mm-modal [data-reset-confirm]').prop('disabled', this.value.trim() !== RESET_PHRASE);
@@ -259,5 +305,5 @@
     });
   }
 
-  window.Modals = { openMember, openMeal, openPrefs, openCook, openReset, bind };
+  window.Modals = { openMember, openMeal, openPrefs, openCook, openReset, openFamilyName, openTuning, bind };
 })();

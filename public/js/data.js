@@ -16,11 +16,11 @@ const ONBOARDING_MEALS = ['poha', 'idli', 'aloopar', 'maggi', 'rajma', 'dal', 'p
 // ── Meal items ────────────────────────────────────────────────
 const MEALS = [
   // Breakfast (complete)
-  { id: 'poha',    name: 'Poha',          types: ['breakfast'], itemType: 'complete', effort: 'quick',  tags: ['Veg','Light','Quick'], last: 1,  desc: 'Flattened rice with onions, peas & a squeeze of lemon.' },
+  { id: 'poha',    name: 'Poha',          types: ['breakfast'], itemType: 'complete', effort: 'quick',  tags: ['Veg','Light','Quick','Tiffin'], last: 1,  desc: 'Flattened rice with onions, peas & a squeeze of lemon.' },
   { id: 'idli',    name: 'Idli Sambar',   types: ['breakfast'], itemType: 'complete', effort: 'medium', tags: ['Veg','Light','Protein'], last: 9, desc: 'Steamed rice cakes with sambar & coconut chutney.' },
-  { id: 'upma',    name: 'Upma',          types: ['breakfast'], itemType: 'complete', effort: 'quick',  tags: ['Veg','Light','Quick'], last: 4, desc: 'Savoury semolina with veggies & curry leaves.' },
-  { id: 'aloopar', name: 'Aloo Paratha',  types: ['breakfast'], itemType: 'complete', effort: 'heavy',  tags: ['Veg','Heavy','Kids'], last: 12, desc: 'Stuffed potato flatbread with butter & curd.' },
-  { id: 'chilla',  name: 'Besan Chilla',  types: ['breakfast'], itemType: 'complete', effort: 'quick',  tags: ['Veg','Healthy','Protein','Quick'], last: 6, desc: 'Spiced gram-flour pancakes, light & filling.' },
+  { id: 'upma',    name: 'Upma',          types: ['breakfast'], itemType: 'complete', effort: 'quick',  tags: ['Veg','Light','Quick','Tiffin'], last: 4, desc: 'Savoury semolina with veggies & curry leaves.' },
+  { id: 'aloopar', name: 'Aloo Paratha',  types: ['breakfast'], itemType: 'complete', effort: 'heavy',  tags: ['Veg','Heavy','Kids','Tiffin'], last: 12, desc: 'Stuffed potato flatbread with butter & curd.' },
+  { id: 'chilla',  name: 'Besan Chilla',  types: ['breakfast'], itemType: 'complete', effort: 'quick',  tags: ['Veg','Healthy','Protein','Quick','Tiffin'], last: 6, desc: 'Spiced gram-flour pancakes, light & filling.' },
   { id: 'dosa',    name: 'Masala Dosa',   types: ['breakfast'], itemType: 'complete', effort: 'medium', tags: ['Veg'], last: 15, desc: 'Crisp dosa with spiced potato filling.' },
 
   // Snacks (complete)
@@ -32,22 +32,22 @@ const MEALS = [
 
   // Lunch / Dinner — complete
   { id: 'khichdi', name: 'Khichdi',       types: ['lunch','dinner'], itemType: 'complete', effort: 'quick',  tags: ['Veg','Light','Healthy','Quick'], last: 8, desc: 'One-pot rice & lentils, comforting and light.' },
-  { id: 'pulao',   name: 'Veg Pulao',     types: ['lunch','dinner'], itemType: 'complete', effort: 'medium', tags: ['Veg'], last: 13, desc: 'Fragrant rice cooked with vegetables & whole spices.' },
+  { id: 'pulao',   name: 'Veg Pulao',     types: ['lunch','dinner'], itemType: 'complete', effort: 'medium', tags: ['Veg','Tiffin'], last: 13, desc: 'Fragrant rice cooked with vegetables & whole spices.' },
 
   // Lunch / Dinner — main dishes
-  { id: 'rajma',   name: 'Rajma',         types: ['lunch','dinner'], itemType: 'main', effort: 'medium', tags: ['Veg','Protein'], last: 8,
+  { id: 'rajma',   name: 'Rajma',         types: ['lunch','dinner'], itemType: 'main', effort: 'medium', tags: ['Veg','Protein','Tiffin'], last: 8,
     serveWith: [{ id: 'rice', score: 5 }, { id: 'roti', score: 2 }], sides: ['salad'], desc: 'Kidney beans in a rich tomato-onion gravy.' },
   { id: 'dal',     name: 'Dal Tadka',     types: ['lunch','dinner'], itemType: 'main', effort: 'quick',  tags: ['Veg','Protein','Quick'], last: 2,
     serveWith: [{ id: 'rice', score: 4 }, { id: 'roti', score: 4 }], sides: ['salad','papad'], desc: 'Yellow lentils finished with a sizzling tempering.' },
   { id: 'chole',   name: 'Chole',         types: ['lunch','dinner'], itemType: 'main', effort: 'medium', tags: ['Veg','Protein','Spicy'], last: 16,
     serveWith: [{ id: 'rice', score: 4 }, { id: 'roti', score: 4 }], sides: ['salad','pickle'], desc: 'Spiced chickpea curry, hearty and bold.' },
-  { id: 'bhindi',  name: 'Bhindi Sabzi',  types: ['lunch','dinner'], itemType: 'main', effort: 'medium', tags: ['Veg'], last: 10,
+  { id: 'bhindi',  name: 'Bhindi Sabzi',  types: ['lunch','dinner'], itemType: 'main', effort: 'medium', tags: ['Veg','Tiffin'], last: 10,
     serveWith: [{ id: 'roti', score: 5 }, { id: 'rice', score: 2 }], sides: ['curd'], desc: 'Stir-fried okra with onions & spices.' },
-  { id: 'paneer',  name: 'Paneer Butter Masala', types: ['lunch','dinner'], itemType: 'main', effort: 'heavy', tags: ['Veg','Kids'], last: 6,
+  { id: 'paneer',  name: 'Paneer Butter Masala', types: ['lunch','dinner'], itemType: 'main', effort: 'heavy', tags: ['Veg','Kids','Tiffin'], last: 6,
     serveWith: [{ id: 'roti', score: 5 }, { id: 'rice', score: 3 }], sides: ['salad'], desc: 'Cottage cheese in a creamy tomato gravy.' },
   { id: 'kadhi',   name: 'Kadhi',         types: ['lunch','dinner'], itemType: 'main', effort: 'medium', tags: ['Veg'], last: 18,
     serveWith: [{ id: 'rice', score: 5 }, { id: 'roti', score: 1 }], sides: ['papad'], desc: 'Yogurt-gram flour curry with soft pakoras.' },
-  { id: 'aloogobi',name: 'Aloo Gobi',     types: ['lunch','dinner'], itemType: 'main', effort: 'quick', tags: ['Veg','Quick'], last: 5,
+  { id: 'aloogobi',name: 'Aloo Gobi',     types: ['lunch','dinner'], itemType: 'main', effort: 'quick', tags: ['Veg','Quick','Tiffin'], last: 5,
     serveWith: [{ id: 'roti', score: 5 }, { id: 'rice', score: 2 }], sides: ['curd'], desc: 'Dry potato & cauliflower stir-fry.' },
   { id: 'palak',   name: 'Palak Paneer',  types: ['lunch','dinner'], itemType: 'main', effort: 'medium', tags: ['Veg','Healthy','Protein'], last: 20,
     serveWith: [{ id: 'roti', score: 5 }, { id: 'rice', score: 3 }], sides: ['salad'], desc: 'Cottage cheese in a smooth spinach gravy.' },
@@ -122,11 +122,13 @@ function pickSides(main, presentIds) {
     .filter(s => !s.blocked);
 }
 
-function buildSuggestion(meal, presentIds, filters) {
+function buildSuggestion(meal, presentIds, filters, tuning) {
+  const prefMult = (tuning && tuning.pref) || 1;    // how much member likes/dislikes count
+  const repeatMult = (tuning && tuning.repeat) || 1; // how hard to avoid recent meals
   const mainC = scoreComponent(meal.id, presentIds);
   if (mainC.blocked) return null;
 
-  let score = mainC.score * WEIGHT.main;
+  let score = mainC.score * WEIGHT.main * prefMult;
   let parts = [{ id: meal.id, name: meal.name, levels: mainC.levels, role: 'main' }];
   let allLevels = Object.values(mainC.levels);
   let staple = null, sides = [];
@@ -134,21 +136,21 @@ function buildSuggestion(meal, presentIds, filters) {
   if (meal.itemType === 'main') {
     staple = pickStaple(meal, presentIds);
     if (staple) {
-      score += staple.score * WEIGHT.staple + staple.compat;
+      score += staple.score * WEIGHT.staple * prefMult + staple.compat;
       const s = byId(staple.id);
       parts.push({ id: s.id, name: s.name, levels: staple.levels, role: 'staple' });
       allLevels = allLevels.concat(Object.values(staple.levels));
     }
     sides = pickSides(meal, presentIds);
     sides.forEach(sd => {
-      score += sd.score * WEIGHT.side;
+      score += sd.score * WEIGHT.side * prefMult;
       const s = byId(sd.id);
       parts.push({ id: s.id, name: s.name, levels: sd.levels, role: 'side' });
       allLevels = allLevels.concat(Object.values(sd.levels));
     });
   }
 
-  const penalty = recentPenalty(meal.last);
+  const penalty = recentPenalty(meal.last) * repeatMult;
   score += penalty;
 
   let filterBonus = 0;
@@ -195,7 +197,7 @@ function reasonFor(s) {
   return bits.slice(0, 3).map((b, i) => i === 0 ? b.charAt(0).toUpperCase() + b.slice(1) : b).join(' \u00b7 ') + '.';
 }
 
-function suggest({ mealType, presentIds, filters = {}, limit = 5 }) {
+function suggest({ mealType, presentIds, filters = {}, limit = 5, tuning }) {
   if (!presentIds || !presentIds.length) return [];
   const single = mealType === 'breakfast' || mealType === 'snacks';
   const candidates = MEALS.filter(m =>
@@ -203,7 +205,7 @@ function suggest({ mealType, presentIds, filters = {}, limit = 5 }) {
     (single ? m.itemType === 'complete' : (m.itemType === 'main' || m.itemType === 'complete'))
   );
   const out = candidates
-    .map(m => buildSuggestion(m, presentIds, filters))
+    .map(m => buildSuggestion(m, presentIds, filters, tuning))
     .filter(Boolean)
     .sort((a, b) =>
       b.score - a.score ||
@@ -226,12 +228,30 @@ const MEAL_TYPES = [
 
 const FILTERS = [
   { id: 'quick',     label: 'Quick',        kind: 'effort', value: 'quick' },
+  { id: 'tiffin',    label: 'Tiffin',       kind: 'tag',    value: 'Tiffin' },
   { id: 'healthy',   label: 'Healthy',      kind: 'tag',    value: 'Healthy' },
   { id: 'light',     label: 'Light',        kind: 'tag',    value: 'Light' },
   { id: 'kids',      label: 'Kids-friendly',kind: 'tag',    value: 'Kids' },
   { id: 'veg',       label: 'Veg only',     kind: 'tag',    value: 'Veg' },
   { id: 'noconflict',label: 'No-conflict',  kind: 'special',value: 'noConflictOnly' },
 ];
+
+// ── Suggestion tuning (Settings → controls the engine) ────────
+// `mult` scales the relevant score contribution. Default values keep the
+// classic behaviour (1.0). Stored per-family and persisted to localStorage.
+const TUNING = {
+  repeatAvoidance: {
+    relaxed:  { label: 'Relaxed',  hint: 'Repeats are totally fine',    mult: 0.4 },
+    balanced: { label: 'Balanced', hint: 'A little variety, not strict', mult: 1.0 },
+    strict:   { label: 'Strict',   hint: 'Strongly avoid recent meals',  mult: 1.8 },
+  },
+  prefWeighting: {
+    gentle:  { label: 'Gentle',  hint: 'Loosely follow likes & dislikes',  mult: 0.6 },
+    default: { label: 'Default', hint: 'Balance everyone fairly',          mult: 1.0 },
+    strong:  { label: 'Strong',  hint: 'Strongly favour what people love',  mult: 1.6 },
+  },
+};
+const DEFAULT_SETTINGS = { repeatAvoidance: 'balanced', prefWeighting: 'default' };
 
 const PREF_META = {
   love:   { label: 'Loves it',   short: 'Loves',  color: '#3E7C4F', score: '+3' },
@@ -242,9 +262,9 @@ const PREF_META = {
 
 window.MM = {
   MEMBERS, MEALS, MEAL_TYPES, FILTERS, HISTORY, PREF_META, PREF_OVERRIDES,
-  SWATCHES, ONBOARDING_MEALS,
+  SWATCHES, ONBOARDING_MEALS, TUNING, DEFAULT_SETTINGS,
   suggest, reasonFor, prefOf, memberById, byId, buildSuggestion, scoreComponent,
-  boot: { familyName: '', onboarded: false },
+  boot: { familyName: '', onboarded: false, settings: DEFAULT_SETTINGS },
 };
 
 // ── Persistence: hydrate from localStorage, or seed it on first run ───
@@ -272,7 +292,11 @@ window.MM = {
     replaceArray(MEALS, saved.meals);
     replaceArray(HISTORY, saved.history);
     replaceObject(PREF_OVERRIDES, saved.prefs);
-    window.MM.boot = { familyName: saved.familyName || '', onboarded: true };
+    window.MM.boot = {
+      familyName: saved.familyName || '',
+      onboarded: true,
+      settings: Object.assign({}, DEFAULT_SETTINGS, saved.settings),
+    };
   } else {
     // First visit (or setup never finished): keep the predefined meals,
     // leave the family empty, and let onboarding take over. Nothing is

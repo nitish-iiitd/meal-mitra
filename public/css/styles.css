@@ -332,3 +332,19 @@ body.mm-onboarding .mm-content { padding: 0; }
 .mm-danger-confirm { background: #F6E6E0; border: 1px solid #E7C7BD; border-radius: 14px; padding: 14px; margin-top: 22px; }
 .mm-danger-confirm .t { font-size: 14px; font-weight: 700; color: #8E2C1C; font-family: var(--display); }
 .mm-danger-confirm .d { font-size: 12.5px; color: var(--ink-soft); margin-top: 4px; line-height: 1.4; }
+
+/* ─── Clickable settings rows + tuning picker ───────────────── */
+.mm-set-row.last { border-bottom: none; }
+.mm-set-row.clickable { cursor: pointer; transition: background .12s; }
+.mm-set-row.clickable:hover { background: var(--cream-2); }
+.mm-pick-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;
+  text-align: left; cursor: pointer; background: var(--card); border: 1.5px solid var(--line);
+  border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; transition: border-color .12s, background .12s;
+}
+.mm-pick-row:hover { border-color: #d8c4a4; }
+.mm-pick-row.on { border: 2px solid var(--terra); background: var(--terra-tint); }
+.mm-pick-title { font-family: var(--display); font-weight: 600; font-size: 15.5px; color: var(--ink); }
+.mm-pick-hint { font-size: 12.5px; color: var(--ink-soft); margin-top: 2px; }
+.mm-pick-check { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.mm-pick-row.on .mm-pick-check { background: var(--terra); }

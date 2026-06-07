@@ -8,6 +8,7 @@
     route: MM.boot.onboarded ? 'home' : 'onboarding',
     onboarded: MM.boot.onboarded,
     familyName: MM.boot.familyName,
+    settings: Object.assign({}, MM.DEFAULT_SETTINGS, MM.boot.settings),
     mealType: 'breakfast',
     present: MM.MEMBERS.filter(m => m.active).map(m => m.id),
     filters: [],
@@ -88,13 +89,21 @@
     return f;
   }
 
+  // Settings → numeric multipliers the engine understands
+  function tuning() {
+    return {
+      pref: MM.TUNING.prefWeighting[State.settings.prefWeighting].mult,
+      repeat: MM.TUNING.repeatAvoidance[State.settings.repeatAvoidance].mult,
+    };
+  }
+
   function runSuggest() {
-    const list = MM.suggest({ mealType: State.mealType, presentIds: State.present, filters: buildFilters(), limit: 5 });
+    const list = MM.suggest({ mealType: State.mealType, presentIds: State.present, filters: buildFilters(), limit: 5, tuning: tuning() });
     list.forEach(s => s.mealType = State.mealType);
     State.suggestions = list; State.surprise = false; State.route = 'results'; render();
   }
   function runSurprise() {
-    const all = MM.suggest({ mealType: State.mealType, presentIds: State.present, filters: buildFilters(), limit: 20 });
+    const all = MM.suggest({ mealType: State.mealType, presentIds: State.present, filters: buildFilters(), limit: 20, tuning: tuning() });
     const pool = all.filter(s => s.score > 0).slice(0, 6);
     const base = pool.length ? pool : all;
     const pick = base[Math.floor(Math.random() * base.length)];
@@ -108,9 +117,10 @@
   function persist() {
     if (!window.Store) return;
     window.Store.save({
-      version: 2,
+      version: 3,
       onboarded: State.onboarded,
       familyName: State.familyName,
+      settings: State.settings,
       members: State.members,
       meals: MM.MEALS,
       history: State.history,
@@ -193,6 +203,14 @@
       State.route = 'home';
       persist(); buildNav(); App.toast('Welcome to MealMitra!'); render();
     },
+    setFamilyName(name) {
+      State.familyName = name;
+      persist(); buildNav(); App.toast('Family name updated'); render();
+    },
+    setTuning(key, val) {
+      State.settings[key] = val;
+      persist(); App.toast('Updated'); render();
+    },
     resetFamily() {
       // Wipe the saved family, then reload: data.js re-seeds the pristine meal
       // catalog with an empty family, which relaunches onboarding.
@@ -242,8 +260,10 @@
       else if (act === 'add-meal') window.Modals.openMeal(null);
       else if (act === 'prefs') window.Modals.openPrefs();
       else if (act === 'add-member') window.Modals.openMember(null);
+      else if (act === 'edit-family') window.Modals.openFamilyName();
       else if (act === 'reset') window.Modals.openReset();
     });
+    $doc.on('click', '[data-tune]', function () { window.Modals.openTuning($(this).data('tune')); });
 
     // results
     $doc.on('click', '[data-cook]', function () {
