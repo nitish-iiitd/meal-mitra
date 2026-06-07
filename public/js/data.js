@@ -2,13 +2,16 @@
 // Exposes window.MM (data + helpers). No framework dependencies.
 
 // ── Family members ────────────────────────────────────────────
-const MEMBERS = [
-  { id: 'asha',   name: 'Asha',   role: 'Mom',     color: '#C4622D', active: true },
-  { id: 'ravi',   name: 'Ravi',   role: 'Dad',     color: '#3E5C3A', active: true },
-  { id: 'nitish', name: 'Nitish', role: 'Son',     color: '#B07A2E', active: true },
-  { id: 'nikita', name: 'Nikita', role: 'Daughter',color: '#9C5A3C', active: true },
-  { id: 'aarav',  name: 'Aarav',  role: 'Kid (6)', color: '#5C7A54', active: true },
-];
+// Empty by default — a new family is created through onboarding, then
+// persisted to localStorage. The meal catalog below stays predefined.
+const MEMBERS = [];
+
+// Colour palette offered when adding a member (shared by onboarding + editor).
+const SWATCHES = ['#C4622D', '#3E5C3A', '#B07A2E', '#9C5A3C', '#5C7A54', '#A84E20', '#6B7F8C', '#8A6D3B'];
+
+// Meals shown in the onboarding "who likes what" step — a representative
+// spread across meal types. The rest default to "okay" and can be set later.
+const ONBOARDING_MEALS = ['poha', 'idli', 'aloopar', 'maggi', 'rajma', 'dal', 'paneer', 'palak'];
 
 // ── Meal items ────────────────────────────────────────────────
 const MEALS = [
@@ -63,36 +66,9 @@ const MEALS = [
 ];
 
 // ── Preferences  meal -> member -> level (love|okay|avoid|cannot) ──
-const PREF_OVERRIDES = {
-  poha:    { asha:'love',  nikita:'avoid', aarav:'avoid' },
-  idli:    { asha:'okay',  ravi:'love',  nitish:'love', nikita:'love', aarav:'love' },
-  upma:    { asha:'avoid', nikita:'avoid', aarav:'cannot' },
-  aloopar: { asha:'okay',  ravi:'love',  nitish:'love', nikita:'love', aarav:'love' },
-  chilla:  { asha:'love',  aarav:'avoid' },
-  dosa:    { ravi:'love',  aarav:'love', nikita:'love' },
-  dhokla:  { asha:'love',  aarav:'avoid' },
-  bhel:    { nitish:'love',nikita:'love' },
-  samosa:  { asha:'okay',  ravi:'love',  nitish:'love', nikita:'love', aarav:'love' },
-  maggi:   { asha:'avoid', ravi:'avoid', nitish:'love', nikita:'love', aarav:'love' },
-  pavbhaji:{ asha:'love',  ravi:'love',  nitish:'love', nikita:'love', aarav:'love' },
-  khichdi: { asha:'love',  ravi:'okay',  aarav:'okay' },
-  pulao:   { asha:'okay',  nikita:'love' },
-  rajma:   { asha:'love',  ravi:'love',  nitish:'okay', nikita:'love', aarav:'okay' },
-  dal:     { asha:'okay',  ravi:'okay',  nitish:'okay', nikita:'okay', aarav:'okay' },
-  chole:   { asha:'love',  ravi:'love',  nitish:'love', nikita:'okay', aarav:'avoid' },
-  bhindi:  { asha:'okay',  ravi:'love',  nitish:'okay', nikita:'avoid', aarav:'avoid' },
-  paneer:  { asha:'love',  ravi:'love',  nitish:'love', nikita:'love', aarav:'love' },
-  kadhi:   { asha:'okay',  ravi:'okay',  nitish:'love', nikita:'okay', aarav:'avoid' },
-  aloogobi:{ asha:'okay',  ravi:'okay',  nikita:'okay', aarav:'okay' },
-  palak:   { asha:'love',  ravi:'love',  nitish:'okay', nikita:'love', aarav:'cannot' },
-  eggcurry:{ asha:'cannot',ravi:'love',  nitish:'love', nikita:'cannot', aarav:'okay' },
-  rice:    { asha:'avoid' },
-  roti:    {},
-  salad:   { aarav:'avoid' },
-  curd:    {},
-  papad:   { aarav:'love' },
-  pickle:  { aarav:'cannot' },
-};
+// Empty by default — filled during onboarding and via the preference grid.
+// Any (meal, member) not listed here defaults to 'okay'.
+const PREF_OVERRIDES = {};
 
 // ── Scoring constants ─────────────────────────────────────────
 const PREF_SCORE = { love: 3, okay: 1, avoid: -2, cannot: -999 };
@@ -238,14 +214,8 @@ function suggest({ mealType, presentIds, filters = {}, limit = 5 }) {
   return out.slice(0, limit);
 }
 
-const HISTORY = [
-  { id: 'h1', mealId: 'dal',    type: 'lunch',     daysAgo: 1, members: ['asha','ravi','nitish','nikita','aarav'], display: 'Dal Tadka + Rice + Salad' },
-  { id: 'h2', mealId: 'poha',   type: 'breakfast', daysAgo: 1, members: ['asha','ravi','nitish'], display: 'Poha' },
-  { id: 'h3', mealId: 'maggi',  type: 'snacks',    daysAgo: 2, members: ['nitish','nikita','aarav'], display: 'Masala Maggi' },
-  { id: 'h4', mealId: 'aloogobi',type:'dinner',    daysAgo: 5, members: ['asha','ravi','nikita'], display: 'Aloo Gobi + Roti + Curd' },
-  { id: 'h5', mealId: 'paneer', type: 'dinner',    daysAgo: 6, members: ['asha','ravi','nitish','nikita','aarav'], display: 'Paneer Butter Masala + Roti' },
-  { id: 'h6', mealId: 'idli',   type: 'breakfast', daysAgo: 9, members: ['asha','ravi','nitish','nikita','aarav'], display: 'Idli Sambar' },
-];
+// Empty by default — fills up as the family marks meals cooked.
+const HISTORY = [];
 
 const MEAL_TYPES = [
   { id: 'breakfast', label: 'Breakfast', hint: 'Morning', icon: 'sunrise' },
@@ -272,5 +242,41 @@ const PREF_META = {
 
 window.MM = {
   MEMBERS, MEALS, MEAL_TYPES, FILTERS, HISTORY, PREF_META, PREF_OVERRIDES,
+  SWATCHES, ONBOARDING_MEALS,
   suggest, reasonFor, prefOf, memberById, byId, buildSuggestion, scoreComponent,
+  boot: { familyName: '', onboarded: false },
 };
+
+// ── Persistence: hydrate from localStorage, or seed it on first run ───
+// MEMBERS / MEALS / HISTORY / PREF_OVERRIDES are the live data the rest of
+// the app reads. We mutate them in place (not reassign) so every existing
+// reference — window.MM.* and the closures in suggest()/prefOf() — stays valid.
+(function hydrate() {
+  if (!window.Store) return;
+
+  const replaceArray = (arr, next) => {
+    if (!Array.isArray(next)) return;
+    arr.length = 0;
+    next.forEach(item => arr.push(item));
+  };
+  const replaceObject = (obj, next) => {
+    if (!next || typeof next !== 'object') return;
+    Object.keys(obj).forEach(k => delete obj[k]);
+    Object.assign(obj, next);
+  };
+
+  const saved = window.Store.load();
+  if (saved && saved.onboarded) {
+    // Returning family: restore their saved data over the predefined catalog.
+    replaceArray(MEMBERS, saved.members);
+    replaceArray(MEALS, saved.meals);
+    replaceArray(HISTORY, saved.history);
+    replaceObject(PREF_OVERRIDES, saved.prefs);
+    window.MM.boot = { familyName: saved.familyName || '', onboarded: true };
+  } else {
+    // First visit (or setup never finished): keep the predefined meals,
+    // leave the family empty, and let onboarding take over. Nothing is
+    // written to storage until setup is completed.
+    window.MM.boot = { familyName: '', onboarded: false };
+  }
+})();

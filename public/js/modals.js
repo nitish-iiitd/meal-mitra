@@ -2,7 +2,7 @@
 (function () {
   const { icon, esc, avatar, prefDot } = window.UI;
   const MM = window.MM;
-  const SWATCHES = ['#C4622D', '#3E5C3A', '#B07A2E', '#9C5A3C', '#5C7A54', '#A84E20', '#6B7F8C', '#8A6D3B'];
+  const SWATCHES = MM.SWATCHES;
 
   function getModal() { return bootstrap.Modal.getOrCreateInstance(document.getElementById('mm-modal')); }
   function setDialogSize(size) {
@@ -29,15 +29,24 @@
     const swatches = SWATCHES.map(c =>
       '<button class="mm-swatch' + (mD.color === c ? ' on' : '') + '" data-m-color="' + c + '" style="background:' + c + '"></button>'
     ).join('');
+    const footer = mD._confirmDelete
+      ? '<div class="mm-danger-confirm">' +
+          '<div class="t">Remove ' + esc(mD.name || 'this member') + ' permanently?</div>' +
+          '<div class="d">Their preferences are deleted. Meal history is kept.</div>' +
+          '<div style="display:flex;gap:10px;margin-top:12px">' +
+            '<button class="mm-btn mm-btn-ghost" data-m-delcancel="1" style="flex:1">Cancel</button>' +
+            '<button class="mm-btn mm-btn-solid-danger" data-m-delconfirm="1" style="flex:1">Delete</button>' +
+          '</div></div>'
+      : '<div style="display:flex;gap:10px;margin-top:24px">' +
+          (mD.id ? '<button class="mm-btn mm-btn-danger" data-m-delete="1" title="Delete member">' + icon('trash', { size: 18, stroke: 2 }) + '</button>' : '') +
+          '<button class="mm-btn mm-btn-primary" data-m-save="1" style="flex:1">' + icon('check', { size: 19, stroke: 2.2 }) + (mD.id ? 'Save' : 'Add member') + '</button>' +
+        '</div>';
     return '<div style="display:flex;justify-content:center;margin-bottom:18px" id="mm-mem-prev">' + avatar(prev, { size: 84 }) + '</div>' +
       '<input class="mm-input" data-m-field="name" placeholder="Name" value="' + esc(mD.name) + '">' +
       '<input class="mm-input" data-m-field="role" placeholder="Role, e.g. Mom, Son, Guest" value="' + esc(mD.role) + '" style="margin-top:10px">' +
       '<div class="mm-field-label">Pick a colour</div>' +
       '<div style="display:flex;gap:12px;flex-wrap:wrap">' + swatches + '</div>' +
-      '<div style="display:flex;gap:10px;margin-top:24px">' +
-        (mD.id ? '<button class="mm-btn mm-btn-danger" data-m-delete="1">' + icon('trash', { size: 18, stroke: 2 }) + '</button>' : '') +
-        '<button class="mm-btn mm-btn-primary" data-m-save="1" style="flex:1">' + icon('check', { size: 19, stroke: 2.2 }) + (mD.id ? 'Save' : 'Add member') + '</button>' +
-      '</div>';
+      footer;
   }
 
   // ════ MEAL EDITOR ══════════════════════════════════════════
@@ -83,6 +92,19 @@
         '<div style="display:flex;flex-wrap:wrap;gap:8px">' + sw + sd + '</div>' + combo + '</div>';
     }
 
+    const footer = eD._confirmDelete
+      ? '<div class="mm-danger-confirm">' +
+          '<div class="t">Delete ' + esc(eD.name || 'this dish') + ' permanently?</div>' +
+          '<div class="d">It’s removed from suggestions and your kitchen.</div>' +
+          '<div style="display:flex;gap:10px;margin-top:12px">' +
+            '<button class="mm-btn mm-btn-ghost" data-e-delcancel="1" style="flex:1">Cancel</button>' +
+            '<button class="mm-btn mm-btn-solid-danger" data-e-delconfirm="1" style="flex:1">Delete</button>' +
+          '</div></div>'
+      : '<div style="display:flex;gap:10px;margin-top:22px">' +
+          (eD._editId ? '<button class="mm-btn mm-btn-danger" data-e-delete="1" title="Delete meal">' + icon('trash', { size: 18, stroke: 2 }) + '</button>' : '') +
+          '<button class="mm-btn mm-btn-ghost" data-e-cancel="1" style="flex:1">Cancel</button>' +
+          '<button class="mm-btn mm-btn-primary" data-e-save="1" style="flex:2">' + icon('check', { size: 19, stroke: 2.2 }) + (eD._editId ? 'Save changes' : 'Add meal') + '</button>' +
+        '</div>';
     return '<input class="mm-input" data-e-field="name" placeholder="Dish name, e.g. Rajma" value="' + esc(eD.name) + '" style="font-family:var(--display);font-weight:600;font-size:19px">' +
       '<div class="mm-field-label">Meal type</div><div style="display:flex;flex-wrap:wrap;gap:8px">' + typeChips + '</div>' +
       '<div class="mm-field-label">This dish is a</div><div class="mm-seg">' + itemSeg + '</div>' +
@@ -91,10 +113,7 @@
       '<div class="mm-field-label">Tags</div><div style="display:flex;flex-wrap:wrap;gap:8px">' + tagChips + '</div>' +
       '<div class="mm-field-label">Description <span class="hint">· optional</span></div>' +
       '<textarea class="mm-textarea" data-e-field="desc" rows="2" placeholder="A short note about this dish">' + esc(eD.desc) + '</textarea>' +
-      '<div style="display:flex;gap:10px;margin-top:22px">' +
-        '<button class="mm-btn mm-btn-ghost" data-e-cancel="1" style="flex:1">Cancel</button>' +
-        '<button class="mm-btn mm-btn-primary" data-e-save="1" style="flex:2">' + icon('check', { size: 19, stroke: 2.2 }) + (eD._editId ? 'Save changes' : 'Add meal') + '</button>' +
-      '</div>';
+      footer;
   }
 
   // ════ PREFERENCE GRID ══════════════════════════════════════
@@ -150,6 +169,22 @@
       '<button class="mm-btn mm-btn-primary lg full" data-cook-confirm="1" style="margin-top:18px">' + icon('check', { size: 21, stroke: 2.2 }) + 'Mark as cooked</button>';
   }
 
+  // ════ RESET FAMILY ═════════════════════════════════════════
+  const RESET_PHRASE = 'delete-family';
+  function openReset() { open('Reset family', resetBody(), ''); }
+  function resetBody() {
+    return '<div class="mm-danger-confirm" style="margin-top:0">' +
+        '<div class="t">This erases everything on this device</div>' +
+        '<div class="d">Your family, members, preferences, meal history and any custom dishes are permanently deleted, and setup starts over. This can’t be undone.</div>' +
+      '</div>' +
+      '<div class="mm-field-label">Type <b style="color:#8E2C1C;font-family:var(--display)">' + RESET_PHRASE + '</b> to confirm</div>' +
+      '<input class="mm-input" id="mm-reset-confirm" placeholder="' + RESET_PHRASE + '" autocomplete="off" autocapitalize="off" spellcheck="false">' +
+      '<div style="display:flex;gap:10px;margin-top:18px">' +
+        '<button class="mm-btn mm-btn-ghost" data-reset-cancel="1" style="flex:1">Cancel</button>' +
+        '<button class="mm-btn mm-btn-solid-danger" data-reset-confirm="1" style="flex:1" disabled>Reset everything</button>' +
+      '</div>';
+  }
+
   // ════ EVENT DELEGATION (scoped to #mm-modal) ═══════════════
   function bind() {
     const $doc = $(document);
@@ -165,7 +200,9 @@
       if (!mD.name.trim()) return;
       window.App.saveMember(mD); close();
     });
-    $doc.on('click', '#mm-modal [data-m-delete]', function () { window.App.deleteMember(mD.id); close(); });
+    $doc.on('click', '#mm-modal [data-m-delete]', function () { mD._confirmDelete = true; setBody(memberBody()); });
+    $doc.on('click', '#mm-modal [data-m-delcancel]', function () { mD._confirmDelete = false; setBody(memberBody()); });
+    $doc.on('click', '#mm-modal [data-m-delconfirm]', function () { window.App.deleteMember(mD.id); close(); });
 
     // Meal editor
     $doc.on('click', '#mm-modal [data-e-toggle]', function () {
@@ -183,6 +220,9 @@
       const out = Object.assign({}, eD, { serveWith: eD.serveWith.map(id => ({ id, score: 4 })) });
       window.App.saveMeal(eD._editId, out); close();
     });
+    $doc.on('click', '#mm-modal [data-e-delete]', function () { syncMealInputs(); eD._confirmDelete = true; setBody(mealBody()); });
+    $doc.on('click', '#mm-modal [data-e-delcancel]', function () { eD._confirmDelete = false; setBody(mealBody()); });
+    $doc.on('click', '#mm-modal [data-e-delconfirm]', function () { window.App.deleteMeal(eD._editId); close(); });
 
     // Pref grid
     $doc.on('click', '#mm-modal [data-pg-type]', function () { pgType = $(this).data('pg-type'); setBody(prefBody()); });
@@ -207,7 +247,17 @@
       const note = $('#mm-cook-note').val() || '';
       window.App.confirmCook(cSugg, cSel, note); close();
     });
+
+    // Reset family — gated behind typing the exact confirmation phrase
+    $doc.on('input', '#mm-modal #mm-reset-confirm', function () {
+      $('#mm-modal [data-reset-confirm]').prop('disabled', this.value.trim() !== RESET_PHRASE);
+    });
+    $doc.on('click', '#mm-modal [data-reset-cancel]', close);
+    $doc.on('click', '#mm-modal [data-reset-confirm]', function () {
+      if ($(this).is(':disabled')) return;
+      window.App.resetFamily();
+    });
   }
 
-  window.Modals = { openMember, openMeal, openPrefs, openCook, bind };
+  window.Modals = { openMember, openMeal, openPrefs, openCook, openReset, bind };
 })();

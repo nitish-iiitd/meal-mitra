@@ -310,3 +310,25 @@ h1,h2,h3,h4 { font-family: var(--display); }
 .mm-grid-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
 .mm-grid-cards .span-2 { grid-column: 1 / -1; }
 @media (max-width: 767.98px) { .mm-grid-cards { grid-template-columns: 1fr; } }
+
+/* ─── Onboarding (first-run setup) ──────────────────────────── */
+body.mm-onboarding .mm-sidebar,
+body.mm-onboarding .mm-topbar,
+body.mm-onboarding .mm-bottomnav { display: none !important; }
+body.mm-onboarding .mm-main { margin-left: 0; }
+body.mm-onboarding .mm-content { padding: 0; }
+.mm-ob { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 28px 18px; }
+.mm-ob-card { width: 100%; max-width: 520px; }
+.mm-ob-brand { display: flex; align-items: center; gap: 11px; justify-content: center; margin-bottom: 18px; }
+.mm-ob-steps { display: flex; gap: 7px; justify-content: center; margin-bottom: 26px; }
+.mm-ob-dot { width: 26px; height: 6px; border-radius: 100px; background: var(--line); transition: background .2s; }
+.mm-ob-dot.on { background: var(--terra); }
+
+/* ─── Icon button + destructive confirm ─────────────────────── */
+.mm-icon-btn { background: none; border: none; cursor: pointer; width: 34px; height: 34px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background .14s; }
+.mm-icon-btn:hover { background: var(--cream-2); }
+.mm-btn-solid-danger { background: #8E2C1C; color: #FFF8EE; border: none; }
+.mm-btn-solid-danger:hover:not(:disabled) { background: #7A2415; }
+.mm-danger-confirm { background: #F6E6E0; border: 1px solid #E7C7BD; border-radius: 14px; padding: 14px; margin-top: 22px; }
+.mm-danger-confirm .t { font-size: 14px; font-weight: 700; color: #8E2C1C; font-family: var(--display); }
+.mm-danger-confirm .d { font-size: 12.5px; color: var(--ink-soft); margin-top: 4px; line-height: 1.4; }

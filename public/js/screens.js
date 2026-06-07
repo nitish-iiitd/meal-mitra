@@ -2,9 +2,80 @@
 // Reads global window.State; emits data-* hooks handled by app.js.
 
 (function () {
-  const { icon, esc, avatar, tag, tagTone, effort, prefAvatars, placeholder } = window.UI;
+  const { icon, esc, avatar, tag, tagTone, effort, prefAvatars, placeholder, prefDot } = window.UI;
   const MM = window.MM;
   const typeLabel = id => (MM.MEAL_TYPES.find(t => t.id === id) || {}).label || '';
+
+  // ── ONBOARDING (first-run setup wizard) ─────────────────────
+  function onboarding() {
+    const ob = window.State.onboard;
+    const brand = '<div class="mm-ob-brand">' +
+      '<div class="mm-brand-mark">' + icon('meals', { size: 22, stroke: 2, color: '#FFF8EE' }) + '</div>' +
+      '<div><div class="mm-brand-name" style="font-size:20px">MealMitra</div>' +
+      '<div class="mm-brand-sub">FAMILY KITCHEN</div></div></div>';
+    const steps = '<div class="mm-ob-steps">' + [1, 2, 3].map(n =>
+      '<span class="mm-ob-dot' + (ob.step >= n ? ' on' : '') + '"></span>').join('') + '</div>';
+    const step = ob.step === 1 ? obName(ob) : ob.step === 2 ? obMembers(ob) : obPrefs(ob);
+    return '<div class="mm-ob mm-fade"><div class="mm-ob-card">' + brand + steps + step + '</div></div>';
+  }
+
+  function obName(ob) {
+    return '<div class="mm-eyebrow">Step 1 of 3</div>' +
+      '<h1 class="mm-h1" style="margin:8px 0 6px">What’s your family called?</h1>' +
+      '<div class="mm-screen-sub" style="margin-bottom:22px">We’ll show this across your kitchen.</div>' +
+      '<input class="mm-input" data-ob-name placeholder="e.g. Srivastava" value="' + esc(ob.familyName) + '" style="font-family:var(--display);font-weight:600;font-size:19px">' +
+      '<button class="mm-btn mm-btn-primary lg full" data-ob-next="1" style="margin-top:24px">Continue' + icon('right', { size: 20, stroke: 2.4, color: '#FFF8EE' }) + '</button>';
+  }
+
+  function obMembers(ob) {
+    const swatches = MM.SWATCHES.map(c =>
+      '<button class="mm-swatch' + (ob.draft.color === c ? ' on' : '') + '" data-ob-color="' + c + '" style="background:' + c + '"></button>').join('');
+    const list = ob.members.length ? ob.members.map(m =>
+      '<div class="mm-card" style="display:flex;align-items:center;gap:12px;padding:12px">' +
+        avatar(m, { size: 42 }) +
+        '<div style="flex:1;min-width:0"><div style="font-family:var(--display);font-weight:600;font-size:15.5px;color:var(--ink)">' + esc(m.name) + '</div>' +
+        (m.role ? '<div style="font-size:12.5px;color:var(--ink-soft)">' + esc(m.role) + '</div>' : '') + '</div>' +
+        '<button class="mm-icon-btn" data-ob-del="' + m.id + '" title="Remove">' + icon('trash', { size: 18, stroke: 2, color: '#8E2C1C' }) + '</button>' +
+      '</div>').join('')
+      : '<div style="text-align:center;color:var(--ink-soft);font-size:13.5px;padding:8px">No members yet — add your first above.</div>';
+    return '<div class="mm-eyebrow">Step 2 of 3</div>' +
+      '<h1 class="mm-h1" style="margin:8px 0 6px">Who’s in the family?</h1>' +
+      '<div class="mm-screen-sub" style="margin-bottom:18px">Add everyone who eats at home.</div>' +
+      '<div class="mm-card" style="padding:14px;margin-bottom:16px">' +
+        '<div style="display:flex;justify-content:center;margin-bottom:14px">' + avatar({ name: ob.draft.name || '?', color: ob.draft.color }, { size: 64 }) + '</div>' +
+        '<input class="mm-input" data-ob-draft="name" placeholder="Name" value="' + esc(ob.draft.name) + '">' +
+        '<input class="mm-input" data-ob-draft="role" placeholder="Role, e.g. Mom, Son, Guest" value="' + esc(ob.draft.role) + '" style="margin-top:10px">' +
+        '<div class="mm-field-label">Pick a colour</div><div style="display:flex;gap:10px;flex-wrap:wrap">' + swatches + '</div>' +
+        '<button class="mm-btn mm-btn-soft full" data-ob-add="1" style="margin-top:16px">' + icon('plus', { size: 18, stroke: 2.2 }) + 'Add member</button>' +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:10px">' + list + '</div>' +
+      '<div style="display:flex;gap:10px;margin-top:18px">' +
+        '<button class="mm-btn mm-btn-ghost" data-ob-back="1" style="flex:1">Back</button>' +
+        '<button class="mm-btn mm-btn-primary" data-ob-next="2" style="flex:2">Continue' + icon('right', { size: 20, stroke: 2.4, color: '#FFF8EE' }) + '</button>' +
+      '</div>';
+  }
+
+  function obPrefs(ob) {
+    const members = ob.members;
+    const meals = MM.ONBOARDING_MEALS.map(id => MM.byId(id)).filter(Boolean);
+    const head = '<tr><th class="dish">Dish</th>' + members.map(m =>
+      '<th><div style="display:flex;flex-direction:column;align-items:center;gap:4px">' + avatar(m, { size: 28 }) +
+      '<span style="font-size:10.5px;font-weight:700;color:var(--ink-soft)">' + esc(m.name) + '</span></div></th>').join('') + '</tr>';
+    const body = meals.map(meal =>
+      '<tr><td class="dish">' + esc(meal.name) + '</td>' + members.map(m => {
+        const lvl = (ob.prefs[meal.id] && ob.prefs[meal.id][m.id]) || 'okay';
+        const col = MM.PREF_META[lvl].color;
+        return '<td style="text-align:center"><span class="mm-grid-cell" data-ob-cell="' + meal.id + ':' + m.id + '" style="background:' + col + '1c">' + prefDot(lvl, 15) + '</span></td>';
+      }).join('') + '</tr>').join('');
+    return '<div class="mm-eyebrow">Step 3 of 3</div>' +
+      '<h1 class="mm-h1" style="margin:8px 0 6px">Who likes what?</h1>' +
+      '<div class="mm-screen-sub" style="margin-bottom:6px">Tap a cell to cycle: <b style="color:var(--love)">Loves</b> → <b style="color:#C99A3A">Okay</b> → <b style="color:#C0563C">Avoids</b> → <b style="color:#8E2C1C">Can’t</b>. Refine the rest later.</div>' +
+      '<div class="mm-grid-wrap" style="margin-top:14px"><table class="mm-grid"><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
+      '<div style="display:flex;gap:10px;margin-top:18px">' +
+        '<button class="mm-btn mm-btn-ghost" data-ob-back="2" style="flex:1">Back</button>' +
+        '<button class="mm-btn mm-btn-primary" data-ob-finish="1" style="flex:2">' + icon('check', { size: 20, stroke: 2.2 }) + 'Finish setup</button>' +
+      '</div>';
+  }
 
   // ── Reusable: meal-type grid ────────────────────────────────
   function mealTypeGrid(value) {
@@ -49,11 +120,12 @@
     const S = window.State;
     const active = S.members.filter(m => m.active);
     const greeting = S.mealType === 'breakfast' ? 'Good morning' : S.mealType === 'dinner' ? 'Good evening' : 'Hello';
+    const firstName = (active[0] && active[0].name) || '';
     const canGo = S.present.length > 0;
     return '<div class="mm-wrap-narrow mm-fade">' +
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px">' +
-        '<div style="flex-shrink:0"><div style="font-size:15px;font-weight:600;color:var(--ink-soft);white-space:nowrap">' + greeting + ', Asha</div>' +
-        '<div class="mm-eyebrow" style="margin-top:4px;white-space:nowrap">Srivastava Family</div></div>' +
+        '<div style="flex-shrink:0"><div style="font-size:15px;font-weight:600;color:var(--ink-soft);white-space:nowrap">' + greeting + (firstName ? ', ' + esc(firstName) : '') + '</div>' +
+        '<div class="mm-eyebrow" style="margin-top:4px;white-space:nowrap">' + esc(S.familyName || 'Your Family') + '</div></div>' +
         '<div style="width:46px;height:46px;border-radius:50%;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;position:relative">' +
         icon('bell', { size: 20, stroke: 2 }) +
         '<span style="position:absolute;top:11px;right:12px;width:8px;height:8px;border-radius:50%;background:var(--terra);border:1.5px solid var(--card)"></span></div>' +
@@ -221,7 +293,7 @@
     ).join('');
     return '<div class="mm-wrap mm-fade">' +
       '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">' +
-        '<div><h1 class="mm-h1">Family</h1><div class="mm-screen-sub">Srivastava Family · ' + S.members.filter(m => m.active).length + ' active</div></div>' +
+        '<div><h1 class="mm-h1">Family</h1><div class="mm-screen-sub">' + esc(S.familyName || 'Your Family') + ' · ' + S.members.filter(m => m.active).length + ' active</div></div>' +
         '<button class="mm-btn mm-btn-primary sm" data-act="add-member">' + icon('plus', { size: 18, stroke: 2.2 }) + 'Add</button>' +
       '</div>' +
       '<div class="mm-grid-cards" style="margin-top:22px">' + cards + '</div>' +
@@ -268,20 +340,25 @@
       icon('right', { size: 18, stroke: 2, color: '#CDB89A' }) + '</div>';
   }
   function settings() {
+    const S = window.State;
+    const fam = S.familyName || 'Your Family';
+    const initial = esc((fam[0] || 'F').toUpperCase());
+    const active = S.members.filter(m => m.active).length;
+    const dishes = S.meals.filter(m => !m.regular).length;
     return '<div class="mm-wrap-narrow mm-fade"><h1 class="mm-h1" style="margin-bottom:22px">Settings</h1>' +
       '<div class="mm-card" style="display:flex;align-items:center;gap:14px;margin-bottom:20px">' +
-        '<div style="width:52px;height:52px;border-radius:50%;background:var(--terra);color:#FFF8EE;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:600;font-size:22px">A</div>' +
-        '<div style="flex:1"><div style="font-family:var(--display);font-weight:600;font-size:17px;color:var(--ink)">Asha Srivastava</div>' +
-        '<div style="font-size:13px;color:var(--ink-soft)">asha@srivastava.in · verified</div></div>' +
+        '<div style="width:52px;height:52px;border-radius:50%;background:var(--terra);color:#FFF8EE;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:600;font-size:22px">' + initial + '</div>' +
+        '<div style="flex:1"><div style="font-family:var(--display);font-weight:600;font-size:17px;color:var(--ink)">' + esc(fam) + '</div>' +
+        '<div style="font-size:13px;color:var(--ink-soft)">' + active + ' member' + (active === 1 ? '' : 's') + ' · saved on this device</div></div>' +
       '</div>' +
       '<div class="mm-label" style="margin:4px 4px 8px">Family</div>' +
-      '<div class="mm-card" style="padding:2px 16px;margin-bottom:20px">' + settingsRow('family', 'Family name', 'Srivastava') + settingsRow('meals', 'Manage meals', '24 dishes', true) + '</div>' +
+      '<div class="mm-card" style="padding:2px 16px;margin-bottom:20px">' + settingsRow('family', 'Family name', esc(fam)) + settingsRow('meals', 'Manage meals', dishes + ' dishes', true) + '</div>' +
       '<div class="mm-label" style="margin:4px 4px 8px">Suggestions</div>' +
       '<div class="mm-card" style="padding:2px 16px;margin-bottom:20px">' + settingsRow('clock', 'Repeat avoidance', 'Balanced') + settingsRow('star', 'Preference weighting', 'Default') + settingsRow('bell', 'Daily reminder', 'Off', true) + '</div>' +
-      '<button class="mm-btn mm-btn-ghost full" style="color:#8E2C1C">Log out</button>' +
+      '<button class="mm-btn mm-btn-ghost full" data-act="reset" style="color:#8E2C1C">' + icon('trash', { size: 18, stroke: 2 }) + 'Reset family / start over</button>' +
       '<div style="text-align:center;font-size:12px;color:#B09B7E;margin-top:16px">MealMitra · v1.0 · web</div>' +
     '</div>';
   }
 
-  window.Screens = { home, results, meals, family, history, settings, suggestionCard };
+  window.Screens = { onboarding, home, results, meals, family, history, settings, suggestionCard };
 })();
