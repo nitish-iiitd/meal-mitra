@@ -123,7 +123,7 @@
     const greeting = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
     const canGo = S.present.length > 0;
     return '<div class="mm-wrap-narrow mm-fade">' +
-      '<div><div style="font-size:15px;font-weight:600;color:var(--ink-soft)">' + greeting + '</div>' +
+      '<div><div class="mm-greeting" style="font-size:15px;font-weight:600;color:var(--ink-soft)">' + greeting + '</div>' +
         '<div class="mm-eyebrow" style="margin-top:4px">' + esc(S.familyName || 'Your Family') + '</div></div>' +
       '<h1 class="mm-h1" style="margin:26px 0 22px">What should we cook today?</h1>' +
       mealTypeGrid(S.mealType) +
@@ -356,6 +356,10 @@
       '<div class="mm-card" style="padding:2px 16px;margin-bottom:20px">' +
         settingsRow('clock', 'Repeat avoidance', MM.TUNING.repeatAvoidance[S.settings.repeatAvoidance].label, { attrs: ' data-tune="repeatAvoidance"' }) +
         settingsRow('star', 'Preference weighting', MM.TUNING.prefWeighting[S.settings.prefWeighting].label, { last: true, attrs: ' data-tune="prefWeighting"' }) + '</div>' +
+      '<div class="mm-label" style="margin:4px 4px 8px">Data</div>' +
+      '<div class="mm-card" style="padding:2px 16px;margin-bottom:20px">' +
+        settingsRow('download', 'Export data', 'JSON', { attrs: ' data-act="export"' }) +
+        settingsRow('upload', 'Import data', 'JSON', { last: true, attrs: ' data-act="import"' }) + '</div>' +
       '<button class="mm-btn mm-btn-ghost full" data-act="reset" style="color:#8E2C1C">' + icon('trash', { size: 18, stroke: 2 }) + 'Reset family / start over</button>' +
       '<div style="text-align:center;font-size:12px;color:#B09B7E;margin-top:16px">MealMitra · v1.0 · web</div>' +
     '</div>';

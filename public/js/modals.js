@@ -202,6 +202,24 @@
     return '<div style="font-size:13.5px;color:var(--ink-soft);margin-bottom:16px;line-height:1.5">' + desc + '</div>' + rows;
   }
 
+  // ════ IMPORT CONFIRM ═══════════════════════════════════════
+  let importPayload = null;
+  function openImportConfirm(data) { importPayload = data; open('Import data', importBody(data), ''); }
+  function importBody(data) {
+    const fam = data.familyName || 'this family';
+    const members = (data.members || []).length;
+    const meals = (data.meals || []).length;
+    const hist = (data.history || []).length;
+    return '<div class="mm-danger-confirm" style="margin-top:0;background:var(--cream-3);border-color:var(--line)">' +
+        '<div class="t" style="color:var(--ink)">Replace your current data with this file?</div>' +
+        '<div class="d">Importing <b style="color:var(--terra-deep)">' + esc(fam) + '</b> — ' + members + ' member' + (members === 1 ? '' : 's') + ' · ' + meals + ' meals · ' + hist + ' history entr' + (hist === 1 ? 'y' : 'ies') + '. Your current data is backed up first.</div>' +
+      '</div>' +
+      '<div style="display:flex;gap:10px;margin-top:18px">' +
+        '<button class="mm-btn mm-btn-ghost" data-import-cancel="1" style="flex:1">Cancel</button>' +
+        '<button class="mm-btn mm-btn-primary" data-import-confirm="1" style="flex:2">' + icon('check', { size: 19, stroke: 2.2 }) + 'Import &amp; replace</button>' +
+      '</div>';
+  }
+
   // ════ RESET FAMILY ═════════════════════════════════════════
   const RESET_PHRASE = 'delete-family';
   function openReset() { open('Reset family', resetBody(), ''); }
@@ -294,6 +312,12 @@
       window.App.setTuning(tuneKey, $(this).data('tune-pick')); close();
     });
 
+    // Import confirm
+    $doc.on('click', '#mm-modal [data-import-cancel]', close);
+    $doc.on('click', '#mm-modal [data-import-confirm]', function () {
+      const d = importPayload; close(); window.App.applyImport(d);
+    });
+
     // Reset family — gated behind typing the exact confirmation phrase
     $doc.on('input', '#mm-modal #mm-reset-confirm', function () {
       $('#mm-modal [data-reset-confirm]').prop('disabled', this.value.trim() !== RESET_PHRASE);
@@ -305,5 +329,5 @@
     });
   }
 
-  window.Modals = { openMember, openMeal, openPrefs, openCook, openReset, openFamilyName, openTuning, bind };
+  window.Modals = { openMember, openMeal, openPrefs, openCook, openReset, openFamilyName, openTuning, openImportConfirm, bind };
 })();

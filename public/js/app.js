@@ -114,18 +114,27 @@
   // ── Persistence ─────────────────────────────────────────────
   // Snapshot the live data and write it to localStorage. State.members /
   // State.history are the source of truth for those; MM.* for meals & prefs.
-  function persist() {
-    if (!window.Store) return;
-    window.Store.save({
-      version: 3,
+  // The full persisted shape — shared by save and JSON export.
+  function snapshot() {
+    // Predefined dishes the family removed — so the additive catalog merge on
+    // load doesn't resurrect them.
+    const liveIds = new Set(MM.MEALS.map(m => m.id));
+    const deletedMealIds = MM.CATALOG.map(m => m.id).filter(id => !liveIds.has(id));
+    return {
+      schemaVersion: MM.CURRENT_SCHEMA,
       onboarded: State.onboarded,
       familyName: State.familyName,
       settings: State.settings,
       members: State.members,
       meals: MM.MEALS,
+      deletedMealIds: deletedMealIds,
       history: State.history,
       prefs: MM.PREF_OVERRIDES,
-    });
+    };
+  }
+  function persist() {
+    if (!window.Store) return;
+    window.Store.save(snapshot());
   }
 
   // ── App API (used by modals) ────────────────────────────────
@@ -211,6 +220,34 @@
       State.settings[key] = val;
       persist(); App.toast('Updated'); render();
     },
+    exportData() {
+      const json = JSON.stringify(snapshot(), null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const name = (State.familyName || 'family').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'family';
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'mealmitra-' + name + '-' + new Date().toISOString().slice(0, 10) + '.json';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      App.toast('Data exported');
+    },
+    importData(text) {
+      let data;
+      try { data = JSON.parse(text); }
+      catch (e) { App.toast('Import failed — not valid JSON'); return; }
+      if (!data || typeof data !== 'object' || !Array.isArray(data.members) || !Array.isArray(data.meals)) {
+        App.toast('Import failed — not a MealMitra export'); return;
+      }
+      window.Modals.openImportConfirm(data);
+    },
+    applyImport(data) {
+      if (data.onboarded == null) data.onboarded = !!(data.members && data.members.length);
+      // Persist the imported blob (Store.save backs up current data first),
+      // then reload so the normal migrate + catalog-merge path applies it.
+      if (window.Store) window.Store.save(data);
+      window.location.reload();
+    },
     resetFamily() {
       // Wipe the saved family, then reload: data.js re-seeds the pristine meal
       // catalog with an empty family, which relaunches onboarding.
@@ -261,9 +298,20 @@
       else if (act === 'prefs') window.Modals.openPrefs();
       else if (act === 'add-member') window.Modals.openMember(null);
       else if (act === 'edit-family') window.Modals.openFamilyName();
+      else if (act === 'export') App.exportData();
+      else if (act === 'import') { const el = document.getElementById('mm-import-file'); if (el) el.click(); }
       else if (act === 'reset') window.Modals.openReset();
     });
     $doc.on('click', '[data-tune]', function () { window.Modals.openTuning($(this).data('tune')); });
+    $doc.on('change', '#mm-import-file', function () {
+      const file = this.files && this.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => App.importData(String(e.target.result));
+      reader.onerror = () => App.toast('Import failed — could not read file');
+      reader.readAsText(file);
+      this.value = ''; // allow re-selecting the same file later
+    });
 
     // results
     $doc.on('click', '[data-cook]', function () {

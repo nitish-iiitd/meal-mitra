@@ -300,6 +300,7 @@ h1,h2,h3,h4 { font-family: var(--display); }
   .mm-bottomnav-item.active .lbl { font-weight: 700; }
   .mm-h1 { font-size: 27px; }
   .mm-mealtypes { grid-template-columns: repeat(2, 1fr); }
+  .mm-greeting { display: none; }   /* mobile: greeting hidden, topbar already shows brand */
 }
 @media (max-width: 575.98px) {
   .mm-content { padding: 16px 14px 96px; }

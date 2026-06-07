@@ -260,9 +260,28 @@ const PREF_META = {
   cannot: { label: 'Cannot eat', short: 'Can\u2019t', color: '#8E2C1C', score: 'block' },
 };
 
+// Pristine snapshot of the shipped meal catalog, taken before any persistence
+// or app mutation. Used to (a) ship newly-added predefined dishes to existing
+// families on upgrade, and (b) detect which predefined dishes a family deleted.
+const CATALOG = JSON.parse(JSON.stringify(MEALS));
+
+// Bump only when the SHAPE of stored data changes. Migrations are additive —
+// they fill in new fields, never drop existing data — so a schema change (even
+// an accidental one) upgrades old data instead of wiping it.
+const CURRENT_SCHEMA = 3;
+function migrate(data) {
+  if (!data || typeof data !== 'object') return data;
+  // v<2: no familyName/onboarded → treated as not-onboarded (handled below).
+  // v<3: no settings → defaults applied at read time.
+  if (data.settings == null) data.settings = {};
+  // (future, version-gated migrations go here — always additive)
+  data.schemaVersion = CURRENT_SCHEMA;
+  return data;
+}
+
 window.MM = {
   MEMBERS, MEALS, MEAL_TYPES, FILTERS, HISTORY, PREF_META, PREF_OVERRIDES,
-  SWATCHES, ONBOARDING_MEALS, TUNING, DEFAULT_SETTINGS,
+  SWATCHES, ONBOARDING_MEALS, TUNING, DEFAULT_SETTINGS, CATALOG, CURRENT_SCHEMA,
   suggest, reasonFor, prefOf, memberById, byId, buildSuggestion, scoreComponent,
   boot: { familyName: '', onboarded: false, settings: DEFAULT_SETTINGS },
 };
@@ -285,13 +304,23 @@ window.MM = {
     Object.assign(obj, next);
   };
 
-  const saved = window.Store.load();
+  const saved = migrate(window.Store.load());
   if (saved && saved.onboarded) {
-    // Returning family: restore their saved data over the predefined catalog.
-    replaceArray(MEMBERS, saved.members);
-    replaceArray(MEALS, saved.meals);
-    replaceArray(HISTORY, saved.history);
-    replaceObject(PREF_OVERRIDES, saved.prefs);
+    // Returning family: restore their saved data. Guards below mean a missing
+    // or malformed field falls back to a safe default instead of wiping.
+    replaceArray(MEMBERS, saved.members || []);
+    replaceArray(HISTORY, saved.history || []);
+    replaceObject(PREF_OVERRIDES, saved.prefs || {});
+
+    // Meals = the family's saved meals, PLUS any predefined dishes shipped
+    // since they last saved (and not deliberately deleted). This lets new
+    // catalog dishes reach existing families without touching their data.
+    const savedMeals = (Array.isArray(saved.meals) && saved.meals.length) ? saved.meals.slice() : CATALOG.slice();
+    const have = new Set(savedMeals.map(m => m.id));
+    const deleted = new Set(saved.deletedMealIds || []);
+    CATALOG.forEach(c => { if (!have.has(c.id) && !deleted.has(c.id)) savedMeals.push(JSON.parse(JSON.stringify(c))); });
+    replaceArray(MEALS, savedMeals);
+
     window.MM.boot = {
       familyName: saved.familyName || '',
       onboarded: true,
@@ -301,6 +330,6 @@ window.MM = {
     // First visit (or setup never finished): keep the predefined meals,
     // leave the family empty, and let onboarding take over. Nothing is
     // written to storage until setup is completed.
-    window.MM.boot = { familyName: '', onboarded: false };
+    window.MM.boot = { familyName: '', onboarded: false, settings: DEFAULT_SETTINGS };
   }
 })();
