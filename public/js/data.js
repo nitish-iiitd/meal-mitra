@@ -11,58 +11,40 @@ const SWATCHES = ['#C4622D', '#3E5C3A', '#B07A2E', '#9C5A3C', '#5C7A54', '#A84E2
 
 // Meals shown in the onboarding "who likes what" step — a representative
 // spread across meal types. The rest default to "okay" and can be set later.
-const ONBOARDING_MEALS = ['poha', 'idli', 'aloopar', 'maggi', 'rajma', 'dal', 'paneer', 'palak'];
+const ONBOARDING_MEALS = ['poha', 'upma', 'sandwich', 'maggi', 'bhel', 'samosa', 'dhokla', 'khichdi', 'pulao', 'rajma', 'bhindi', 'aloogobi'];
 
 // ── Meal items ────────────────────────────────────────────────
 const MEALS = [
   // Breakfast (complete)
-  { id: 'poha',    name: 'Poha',          types: ['breakfast'], itemType: 'complete', effort: 'quick',  tags: ['Veg','Light','Quick','Tiffin'], last: 1,  desc: 'Flattened rice with onions, peas & a squeeze of lemon.' },
-  { id: 'idli',    name: 'Idli Sambar',   types: ['breakfast'], itemType: 'complete', effort: 'medium', tags: ['Veg','Light','Protein'], last: 9, desc: 'Steamed rice cakes with sambar & coconut chutney.' },
-  { id: 'upma',    name: 'Upma',          types: ['breakfast'], itemType: 'complete', effort: 'quick',  tags: ['Veg','Light','Quick','Tiffin'], last: 4, desc: 'Savoury semolina with veggies & curry leaves.' },
-  { id: 'aloopar', name: 'Aloo Paratha',  types: ['breakfast'], itemType: 'complete', effort: 'heavy',  tags: ['Veg','Heavy','Kids','Tiffin'], last: 12, desc: 'Stuffed potato flatbread with butter & curd.' },
-  { id: 'chilla',  name: 'Besan Chilla',  types: ['breakfast'], itemType: 'complete', effort: 'quick',  tags: ['Veg','Healthy','Protein','Quick','Tiffin'], last: 6, desc: 'Spiced gram-flour pancakes, light & filling.' },
-  { id: 'dosa',    name: 'Masala Dosa',   types: ['breakfast'], itemType: 'complete', effort: 'medium', tags: ['Veg'], last: 15, desc: 'Crisp dosa with spiced potato filling.' },
+  { id: 'poha',     name: 'Poha',         types: ['breakfast'], itemType: 'complete', effort: 'quick', tags: ['Veg','Light','Quick','Tiffin'], last: null, desc: 'Flattened rice with onions, peas & a squeeze of lemon.' },
+  { id: 'upma',     name: 'Upma',         types: ['breakfast'], itemType: 'complete', effort: 'quick', tags: ['Veg','Light','Quick','Tiffin'], last: null, desc: 'Savoury semolina with veggies & curry leaves.' },
+  { id: 'sandwich', name: 'Veg Sandwich', types: ['breakfast'], itemType: 'complete', effort: 'quick', tags: ['Veg','Quick','Kids','Tiffin'], last: null, desc: 'Grilled bread layered with veggies & green chutney.' },
 
   // Snacks (complete)
-  { id: 'dhokla',  name: 'Dhokla',        types: ['snacks'], itemType: 'complete', effort: 'medium', tags: ['Veg','Light','Healthy'], last: 11, desc: 'Steamed savoury cakes, soft and tangy.' },
-  { id: 'bhel',    name: 'Bhel Puri',     types: ['snacks'], itemType: 'complete', effort: 'quick',  tags: ['Veg','Light','Quick'], last: 7, desc: 'Puffed rice tossed with chutneys & sev.' },
-  { id: 'samosa',  name: 'Samosa',        types: ['snacks'], itemType: 'complete', effort: 'heavy',  tags: ['Veg','Heavy'], last: 5, desc: 'Crisp pastry with spiced potato filling.' },
-  { id: 'maggi',   name: 'Masala Maggi',  types: ['snacks'], itemType: 'complete', effort: 'quick',  tags: ['Kids','Quick'], last: 2, desc: '2-minute noodles, the kids\u2019 favourite.' },
-  { id: 'pavbhaji',name: 'Pav Bhaji',     types: ['snacks','dinner'], itemType: 'complete', effort: 'medium', tags: ['Veg','Kids','Heavy'], last: 14, desc: 'Spiced veg mash with buttered pav.' },
+  { id: 'bhel',     name: 'Bhel Puri',    types: ['snacks'], itemType: 'complete', effort: 'quick',  tags: ['Veg','Light','Quick'], last: null, desc: 'Puffed rice tossed with chutneys & sev.' },
+  { id: 'samosa',   name: 'Samosa',       types: ['snacks'], itemType: 'complete', effort: 'heavy',  tags: ['Veg','Heavy'], last: null, desc: 'Crisp pastry with spiced potato filling.' },
+  { id: 'dhokla',   name: 'Dhokla',       types: ['snacks'], itemType: 'complete', effort: 'medium', tags: ['Veg','Light','Healthy'], last: null, desc: 'Steamed savoury cakes, soft and tangy.' },
+  { id: 'maggi',    name: 'Masala Maggi', types: ['breakfast','snacks'], itemType: 'complete', effort: 'quick', tags: ['Kids','Quick'], last: null, desc: '2-minute noodles, the kids\u2019 favourite.' },
 
   // Lunch / Dinner — complete
-  { id: 'khichdi', name: 'Khichdi',       types: ['lunch','dinner'], itemType: 'complete', effort: 'quick',  tags: ['Veg','Light','Healthy','Quick'], last: 8, desc: 'One-pot rice & lentils, comforting and light.' },
-  { id: 'pulao',   name: 'Veg Pulao',     types: ['lunch','dinner'], itemType: 'complete', effort: 'medium', tags: ['Veg','Tiffin'], last: 13, desc: 'Fragrant rice cooked with vegetables & whole spices.' },
+  { id: 'khichdi',  name: 'Khichdi',      types: ['lunch','dinner'], itemType: 'complete', effort: 'quick',  tags: ['Veg','Light','Healthy','Quick'], last: null, desc: 'One-pot rice & lentils, comforting and light.' },
+  { id: 'pulao',    name: 'Veg Pulao',    types: ['lunch','dinner'], itemType: 'complete', effort: 'medium', tags: ['Veg','Tiffin'], last: null, desc: 'Fragrant rice cooked with vegetables & whole spices.' },
 
   // Lunch / Dinner — main dishes
-  { id: 'rajma',   name: 'Rajma',         types: ['lunch','dinner'], itemType: 'main', effort: 'medium', tags: ['Veg','Protein','Tiffin'], last: 8,
+  { id: 'rajma',    name: 'Rajma',        types: ['lunch','dinner'], itemType: 'main', effort: 'medium', tags: ['Veg','Protein','Tiffin'], last: null,
     serveWith: [{ id: 'rice', score: 5 }, { id: 'roti', score: 2 }], sides: ['salad'], desc: 'Kidney beans in a rich tomato-onion gravy.' },
-  { id: 'dal',     name: 'Dal Tadka',     types: ['lunch','dinner'], itemType: 'main', effort: 'quick',  tags: ['Veg','Protein','Quick'], last: 2,
-    serveWith: [{ id: 'rice', score: 4 }, { id: 'roti', score: 4 }], sides: ['salad','papad'], desc: 'Yellow lentils finished with a sizzling tempering.' },
-  { id: 'chole',   name: 'Chole',         types: ['lunch','dinner'], itemType: 'main', effort: 'medium', tags: ['Veg','Protein','Spicy'], last: 16,
-    serveWith: [{ id: 'rice', score: 4 }, { id: 'roti', score: 4 }], sides: ['salad','pickle'], desc: 'Spiced chickpea curry, hearty and bold.' },
-  { id: 'bhindi',  name: 'Bhindi Sabzi',  types: ['lunch','dinner'], itemType: 'main', effort: 'medium', tags: ['Veg','Tiffin'], last: 10,
+  { id: 'bhindi',   name: 'Bhindi Sabzi', types: ['lunch','dinner'], itemType: 'main', effort: 'medium', tags: ['Veg','Tiffin'], last: null,
     serveWith: [{ id: 'roti', score: 5 }, { id: 'rice', score: 2 }], sides: ['curd'], desc: 'Stir-fried okra with onions & spices.' },
-  { id: 'paneer',  name: 'Paneer Butter Masala', types: ['lunch','dinner'], itemType: 'main', effort: 'heavy', tags: ['Veg','Kids','Tiffin'], last: 6,
-    serveWith: [{ id: 'roti', score: 5 }, { id: 'rice', score: 3 }], sides: ['salad'], desc: 'Cottage cheese in a creamy tomato gravy.' },
-  { id: 'kadhi',   name: 'Kadhi',         types: ['lunch','dinner'], itemType: 'main', effort: 'medium', tags: ['Veg'], last: 18,
-    serveWith: [{ id: 'rice', score: 5 }, { id: 'roti', score: 1 }], sides: ['papad'], desc: 'Yogurt-gram flour curry with soft pakoras.' },
-  { id: 'aloogobi',name: 'Aloo Gobi',     types: ['lunch','dinner'], itemType: 'main', effort: 'quick', tags: ['Veg','Quick','Tiffin'], last: 5,
+  { id: 'aloogobi', name: 'Aloo Gobi',    types: ['lunch','dinner'], itemType: 'main', effort: 'quick', tags: ['Veg','Quick','Tiffin'], last: null,
     serveWith: [{ id: 'roti', score: 5 }, { id: 'rice', score: 2 }], sides: ['curd'], desc: 'Dry potato & cauliflower stir-fry.' },
-  { id: 'palak',   name: 'Palak Paneer',  types: ['lunch','dinner'], itemType: 'main', effort: 'medium', tags: ['Veg','Healthy','Protein'], last: 20,
-    serveWith: [{ id: 'roti', score: 5 }, { id: 'rice', score: 3 }], sides: ['salad'], desc: 'Cottage cheese in a smooth spinach gravy.' },
-  { id: 'eggcurry',name: 'Egg Curry',     types: ['lunch','dinner'], itemType: 'main', effort: 'medium', tags: ['Non-veg','Protein'], last: 9,
-    serveWith: [{ id: 'rice', score: 5 }, { id: 'roti', score: 3 }], sides: ['salad'], desc: 'Boiled eggs simmered in spiced onion gravy.' },
 
   // Regular items — staples
-  { id: 'rice',    name: 'Rice',          types: ['lunch','dinner'], itemType: 'staple', regular: true, defaultOn: true, effort: 'quick', tags: ['Veg'], last: 1, desc: 'Steamed basmati rice.' },
-  { id: 'roti',    name: 'Roti',          types: ['lunch','dinner'], itemType: 'staple', regular: true, defaultOn: true, effort: 'medium', tags: ['Veg'], last: 1, desc: 'Soft whole-wheat flatbread.' },
+  { id: 'rice',     name: 'Rice',         types: ['lunch','dinner'], itemType: 'staple', regular: true, defaultOn: true, effort: 'quick', tags: ['Veg'], last: null, desc: 'Steamed basmati rice.' },
+  { id: 'roti',     name: 'Roti',         types: ['lunch','dinner'], itemType: 'staple', regular: true, defaultOn: true, effort: 'medium', tags: ['Veg'], last: null, desc: 'Soft whole-wheat flatbread.' },
 
   // Regular items — sides
-  { id: 'salad',   name: 'Salad',         types: ['lunch','dinner'], itemType: 'side', regular: true, defaultOn: true, effort: 'quick', tags: ['Veg','Healthy'], last: 1, desc: 'Onion, cucumber & tomato with lemon.' },
-  { id: 'curd',    name: 'Curd',          types: ['lunch','dinner'], itemType: 'side', regular: true, defaultOn: false, effort: 'quick', tags: ['Veg'], last: 2, desc: 'Fresh set yogurt.' },
-  { id: 'papad',   name: 'Papad',         types: ['lunch','dinner'], itemType: 'side', regular: true, defaultOn: false, effort: 'quick', tags: ['Veg'], last: 3, desc: 'Roasted lentil crisp.' },
-  { id: 'pickle',  name: 'Pickle',        types: ['lunch','dinner'], itemType: 'side', regular: true, defaultOn: false, effort: 'quick', tags: ['Veg','Spicy'], last: 1, desc: 'Tangy mango pickle.' },
+  { id: 'salad',    name: 'Salad',        types: ['lunch','dinner'], itemType: 'side', regular: true, defaultOn: true, effort: 'quick', tags: ['Veg','Healthy'], last: null, desc: 'Onion, cucumber & tomato with lemon.' },
+  { id: 'curd',     name: 'Curd',         types: ['lunch','dinner'], itemType: 'side', regular: true, defaultOn: false, effort: 'quick', tags: ['Veg'], last: null, desc: 'Fresh set yogurt.' },
 ];
 
 // ── Preferences  meal -> member -> level (love|okay|avoid|cannot) ──

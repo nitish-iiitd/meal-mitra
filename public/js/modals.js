@@ -51,7 +51,7 @@
 
   // ════ MEAL EDITOR ══════════════════════════════════════════
   const TAGS = ['Veg', 'Non-veg', 'Healthy', 'Light', 'Heavy', 'Quick', 'Kids', 'Spicy', 'Protein', 'Tiffin'];
-  const STAPLES = ['rice', 'roti'], SIDES = ['salad', 'curd', 'papad', 'pickle'];
+  const STAPLES = ['rice', 'roti'], SIDES = ['salad', 'curd'];
   let eD = null;
   function openMeal(meal) {
     const blank = { name: '', types: ['breakfast'], itemType: 'complete', effort: 'medium', tags: [], serveWith: [], sides: [], desc: '' };
