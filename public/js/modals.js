@@ -51,10 +51,12 @@
 
   // ════ MEAL EDITOR ══════════════════════════════════════════
   const TAGS = ['Veg', 'Non-veg', 'Healthy', 'Light', 'Heavy', 'Quick', 'Kids', 'Spicy', 'Protein', 'Tiffin'];
-  const STAPLES = ['rice', 'roti'], SIDES = ['salad', 'curd'];
+  // Components offered when building a main's combo are read live from the
+  // catalog: every regular staple / side, including user-added ones.
+  const componentMeals = type => MM.MEALS.filter(m => m.regular && m.itemType === type);
   let eD = null;
   function openMeal(meal) {
-    const blank = { name: '', types: ['breakfast'], itemType: 'complete', effort: 'medium', tags: [], serveWith: [], sides: [], desc: '' };
+    const blank = { name: '', types: ['breakfast'], itemType: 'complete', effort: 'medium', tags: [], serveWith: [], sides: [], desc: '', group: '' };
     eD = meal
       ? Object.assign({}, blank, meal, { serveWith: (meal.serveWith || []).map(s => s.id) })
       : blank;
@@ -65,6 +67,8 @@
     const $b = $('#mm-modal .modal-body');
     eD.name = $b.find('[data-e-field="name"]').val() || '';
     eD.desc = $b.find('[data-e-field="desc"]').val() || '';
+    const g = $b.find('[data-e-field="group"]');
+    if (g.length) eD.group = g.val() || '';
   }
   function chip(on, attr, label) {
     return '<button class="mm-chip' + (on ? ' on' : '') + '" ' + attr + '>' + esc(label) + '</button>';
@@ -73,7 +77,7 @@
     const isMain = eD.itemType === 'main';
     const lunchy = eD.types.includes('lunch') || eD.types.includes('dinner');
     const typeChips = MM.MEAL_TYPES.map(t => chip(eD.types.includes(t.id), 'data-e-toggle="types" data-e-val="' + t.id + '"', t.label)).join('');
-    const itemSeg = [['complete', 'Complete meal'], ['main', 'Main dish'], ['side', 'Side / add-on']].map(([v, l]) =>
+    const itemSeg = [['complete', 'Complete'], ['main', 'Main'], ['staple', 'Staple'], ['side', 'Side']].map(([v, l]) =>
       '<button class="' + (eD.itemType === v ? 'on' : '') + '" data-e-itemtype="' + v + '">' + l + '</button>').join('');
     const effortSeg = [['quick', 'Quick'], ['medium', 'Medium'], ['heavy', 'Heavy']].map(([v, l]) =>
       '<button class="' + (eD.effort === v ? 'on' : '') + '" data-e-effort="' + v + '">' + l + '</button>').join('');
@@ -81,15 +85,31 @@
 
     let comboPanel = '';
     if (isMain && lunchy) {
-      const sw = STAPLES.map(id => chip(eD.serveWith.includes(id), 'data-e-toggle="serveWith" data-e-val="' + id + '"', MM.byId(id).name)).join('');
-      const sd = SIDES.map(id => chip(eD.sides.includes(id), 'data-e-toggle="sides" data-e-val="' + id + '"', MM.byId(id).name)).join('');
+      const swItems = componentMeals('staple'), sdItems = componentMeals('side');
+      const sw = swItems.map(m => chip(eD.serveWith.includes(m.id), 'data-e-toggle="serveWith" data-e-val="' + m.id + '"', m.name)).join('');
+      const sd = sdItems.map(m => chip(eD.sides.includes(m.id), 'data-e-toggle="sides" data-e-val="' + m.id + '"', m.name)).join('');
+      const nameOf = id => (MM.byId(id) || {}).name;
+      const picker = (swItems.length || sdItems.length)
+        ? '<div style="display:flex;flex-wrap:wrap;gap:8px">' + sw + sd + '</div>'
+        : '<div style="font-size:12.5px;color:var(--ink-soft);line-height:1.5">No staples or sides yet. Add one from the Meals screen — set <b>This dish is a</b> to <b>Staple</b> or <b>Side</b>.</div>';
       const combo = (eD.serveWith.length || eD.sides.length)
         ? '<div style="font-size:13px;color:var(--ink-soft);margin-top:12px">Suggests as <b style="color:var(--terra-deep);font-family:var(--display)">' +
-            esc([eD.name || 'Dish'].concat(eD.serveWith.map(i => MM.byId(i).name), eD.sides.map(i => MM.byId(i).name)).join(' + ')) + '</b></div>'
+            esc([eD.name || 'Dish'].concat(eD.serveWith.map(nameOf), eD.sides.map(nameOf)).filter(Boolean).join(' + ')) + '</b></div>'
         : '';
       comboPanel = '<div style="background:var(--cream-3);border-radius:16px;padding:4px 14px 16px;margin-top:16px">' +
-        '<div class="mm-field-label">Usually served with <span class="hint">· builds the combo</span></div>' +
-        '<div style="display:flex;flex-wrap:wrap;gap:8px">' + sw + sd + '</div>' + combo + '</div>';
+        '<div class="mm-field-label">Usually served with <span class="hint">· builds the combo</span></div>' + picker + combo + '</div>';
+    }
+
+    let groupPanel = '';
+    if (eD.itemType === 'staple' || eD.itemType === 'side') {
+      const existing = Array.from(new Set(MM.MEALS.filter(m => m.regular && (m.group || '').trim()).map(m => m.group.trim())));
+      const opts = existing.map(g => '<option value="' + esc(g) + '">').join('');
+      groupPanel = '<div style="background:var(--cream-3);border-radius:16px;padding:4px 14px 16px;margin-top:16px">' +
+        '<div class="mm-field-label">Group <span class="hint">· optional</span></div>' +
+        '<input class="mm-input" data-e-field="group" list="mm-group-list" placeholder="e.g. dal, bread, raita" value="' + esc(eD.group || '') + '">' +
+        (opts ? '<datalist id="mm-group-list">' + opts + '</datalist>' : '') +
+        '<div style="font-size:12.5px;color:var(--ink-soft);margin-top:8px;line-height:1.5">Items in the same group are interchangeable — only <b>one</b> is suggested with a main (tag all your dals <b>dal</b>). Leave blank to always serve this alongside.</div>' +
+      '</div>';
     }
 
     const footer = eD._confirmDelete
@@ -108,6 +128,7 @@
     return '<input class="mm-input" data-e-field="name" placeholder="Dish name, e.g. Rajma" value="' + esc(eD.name) + '" style="font-family:var(--display);font-weight:600;font-size:19px">' +
       '<div class="mm-field-label">Meal type</div><div style="display:flex;flex-wrap:wrap;gap:8px">' + typeChips + '</div>' +
       '<div class="mm-field-label">This dish is a</div><div class="mm-seg">' + itemSeg + '</div>' +
+      groupPanel +
       comboPanel +
       '<div class="mm-field-label">Effort to cook</div><div class="mm-seg">' + effortSeg + '</div>' +
       '<div class="mm-field-label">Tags</div><div style="display:flex;flex-wrap:wrap;gap:8px">' + tagChips + '</div>' +

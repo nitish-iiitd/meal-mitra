@@ -226,7 +226,12 @@
     const S = window.State;
     const active = S.members.filter(m => m.active);
     const q = (S.mealQuery || '').toLowerCase();
-    const list = S.meals.filter(m => !m.regular && (S.mealFilter === 'all' || m.types.includes(S.mealFilter)) && m.name.toLowerCase().includes(q));
+    // Include regular components (staples/sides) so they can be managed here;
+    // dishes first, components after.
+    const list = S.meals.filter(m => (S.mealFilter === 'all' || m.types.includes(S.mealFilter)) && m.name.toLowerCase().includes(q))
+      .sort((a, b) => (a.regular ? 1 : 0) - (b.regular ? 1 : 0));
+    const dishCount = list.filter(m => !m.regular).length;
+    const compCount = list.length - dishCount;
     const typeFilters = [{ id: 'all', label: 'All' }].concat(MM.MEAL_TYPES.map(t => ({ id: t.id, label: t.label })));
 
     const chips = typeFilters.map(t =>
@@ -245,7 +250,7 @@
         '<div style="flex:1;min-width:0">' +
           '<div style="font-family:var(--display);font-weight:600;font-size:16px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(m.name) + '</div>' +
           '<div style="display:flex;align-items:center;gap:7px;margin-top:4px">' +
-            '<span style="font-size:12px;font-weight:600;color:var(--ink-soft)">' + ITEM_TYPE_LABEL[m.itemType] + '</span>' +
+            '<span style="font-size:12px;font-weight:600;color:var(--ink-soft)">' + ITEM_TYPE_LABEL[m.itemType] + (m.group ? ' · ' + esc(m.group) : '') + '</span>' +
             '<span style="width:3px;height:3px;border-radius:3px;background:#CDB89A"></span>' + effort(m.effort) +
           '</div>' +
           '<div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap">' + badges.join('') + t1 + '</div>' +
@@ -255,7 +260,7 @@
 
     return '<div class="mm-wrap mm-fade">' +
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">' +
-        '<div><h1 class="mm-h1">Meals</h1><div class="mm-screen-sub">' + list.length + ' dishes in your kitchen</div></div>' +
+        '<div><h1 class="mm-h1">Meals</h1><div class="mm-screen-sub">' + dishCount + ' dish' + (dishCount === 1 ? '' : 'es') + (compCount ? ' · ' + compCount + ' staple' + (compCount === 1 ? '' : 's') + ' &amp; sides' : '') + '</div></div>' +
         '<button class="mm-btn mm-btn-primary sm" data-act="add-meal">' + icon('plus', { size: 18, stroke: 2.2 }) + 'Add meal</button>' +
       '</div>' +
       '<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:20px 0 16px">' +

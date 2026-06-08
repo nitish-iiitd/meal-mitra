@@ -174,13 +174,20 @@
       persist(); buildNav(); App.toast('Member removed'); render();
     },
     saveMeal(editId, data) {
+      // Drop transient editor flags (e.g. _editId, _confirmDelete) so they
+      // never get stored or exported.
+      const clean = {};
+      Object.keys(data).forEach(k => { if (k[0] !== '_') clean[k] = data[k]; });
+      // Staples and sides are regular components (combo parts), not standalone
+      // dishes — they're built from the main's "served with" picker.
+      const regular = clean.itemType === 'staple' || clean.itemType === 'side';
       if (editId) {
         const idx = MM.MEALS.findIndex(x => x.id === editId);
-        if (idx >= 0) MM.MEALS[idx] = Object.assign({}, MM.MEALS[idx], data);
+        if (idx >= 0) MM.MEALS[idx] = Object.assign({}, MM.MEALS[idx], clean, { regular: regular });
         App.toast('Meal updated');
       } else {
-        MM.MEALS.push(Object.assign({}, data, { id: slug(data.name), last: null, regular: false }));
-        App.toast(data.name + ' added');
+        MM.MEALS.push(Object.assign({}, clean, { id: slug(clean.name), last: null, regular: regular }));
+        App.toast(clean.name + ' added');
       }
       State.meals = MM.MEALS.slice(); persist(); render();
     },
@@ -256,7 +263,10 @@
     },
     confirmCook(sugg, memberIds, note) {
       State.history = [{ id: 'h' + Date.now(), mealId: sugg.id, type: sugg.mealType, daysAgo: 0, members: memberIds, display: sugg.displayName, note: note }].concat(State.history);
-      const m = MM.MEALS.find(x => x.id === sugg.id); if (m) m.last = 0;
+      // Mark the main AND each chosen component as cooked today, so grouped
+      // components (e.g. dals) rotate to a different option next time.
+      const cookedIds = [sugg.id].concat((sugg.parts || []).filter(p => p.role === 'staple' || p.role === 'side').map(p => p.id));
+      cookedIds.forEach(id => { const m = MM.MEALS.find(x => x.id === id); if (m) m.last = 0; });
       State.meals = MM.MEALS.slice();
       persist();
       App.toast(sugg.main.name + ' added to history');

@@ -38,9 +38,9 @@ const MEALS = [
   { id: 'aloogobi', name: 'Aloo Gobi',    types: ['lunch','dinner'], itemType: 'main', effort: 'quick', tags: ['Veg','Quick','Tiffin'], last: null,
     serveWith: [{ id: 'roti', score: 5 }, { id: 'rice', score: 2 }], sides: ['curd'], desc: 'Dry potato & cauliflower stir-fry.' },
 
-  // Regular items — staples
-  { id: 'rice',     name: 'Rice',         types: ['lunch','dinner'], itemType: 'staple', regular: true, defaultOn: true, effort: 'quick', tags: ['Veg'], last: null, desc: 'Steamed basmati rice.' },
-  { id: 'roti',     name: 'Roti',         types: ['lunch','dinner'], itemType: 'staple', regular: true, defaultOn: true, effort: 'medium', tags: ['Veg'], last: null, desc: 'Soft whole-wheat flatbread.' },
+  // Regular items — staples (rice & roti share the "bread" group → pick one)
+  { id: 'rice',     name: 'Rice',         types: ['lunch','dinner'], itemType: 'staple', regular: true, defaultOn: true, group: 'bread', effort: 'quick', tags: ['Veg'], last: null, desc: 'Steamed basmati rice.' },
+  { id: 'roti',     name: 'Roti',         types: ['lunch','dinner'], itemType: 'staple', regular: true, defaultOn: true, group: 'bread', effort: 'medium', tags: ['Veg'], last: null, desc: 'Soft whole-wheat flatbread.' },
 
   // Regular items — sides
   { id: 'salad',    name: 'Salad',        types: ['lunch','dinner'], itemType: 'side', regular: true, defaultOn: true, effort: 'quick', tags: ['Veg','Healthy'], last: null, desc: 'Onion, cucumber & tomato with lemon.' },
@@ -85,23 +85,39 @@ function scoreComponent(mealId, presentIds) {
   return { score: sum, blocked, levels };
 }
 
-function pickStaple(main, presentIds) {
-  if (!main.serveWith) return null;
-  let best = null;
-  main.serveWith.forEach(({ id, score }) => {
+// A component's group: items that share one are interchangeable (only one is
+// chosen). Ungrouped components are alone in their own group → always included.
+const groupOf = m => ((m.group || '').trim().toLowerCase()) || m.id;
+
+// Recency only breaks ties within a group, so distinct picks (e.g. roti > rice)
+// are unaffected, but equal options (e.g. your dals) rotate as you cook them.
+const COMPONENT_RECENCY = 0.1;
+
+// Pick the best non-blocked component per group from a candidate list.
+// candidates: [{ id, compat }] (compat = per-main pairing score; 0 for sides).
+function pickGrouped(candidates, presentIds, weight) {
+  const byGroup = {};
+  candidates.forEach(({ id, compat }) => {
+    const m = byId(id);
+    if (!m) return;
     const cs = scoreComponent(id, presentIds);
     if (cs.blocked) return;
-    const total = cs.score * WEIGHT.staple + score;
-    if (!best || total > best.total) best = { id, compat: score, ...cs, total };
+    compat = compat || 0;
+    const total = cs.score * weight + compat + recentPenalty(m.last) * COMPONENT_RECENCY;
+    const g = groupOf(m);
+    if (!byGroup[g] || total > byGroup[g].total) byGroup[g] = { id, compat, score: cs.score, levels: cs.levels, total };
   });
-  return best;
+  return Object.values(byGroup);
+}
+
+function pickStaples(main, presentIds) {
+  if (!main.serveWith) return [];
+  return pickGrouped(main.serveWith.map(s => ({ id: s.id, compat: s.score })), presentIds, WEIGHT.staple);
 }
 
 function pickSides(main, presentIds) {
   if (!main.sides) return [];
-  return main.sides
-    .map(id => ({ id, ...scoreComponent(id, presentIds) }))
-    .filter(s => !s.blocked);
+  return pickGrouped(main.sides.map(id => ({ id, compat: 0 })), presentIds, WEIGHT.side);
 }
 
 function buildSuggestion(meal, presentIds, filters, tuning) {
@@ -113,16 +129,16 @@ function buildSuggestion(meal, presentIds, filters, tuning) {
   let score = mainC.score * WEIGHT.main * prefMult;
   let parts = [{ id: meal.id, name: meal.name, levels: mainC.levels, role: 'main' }];
   let allLevels = Object.values(mainC.levels);
-  let staple = null, sides = [];
+  let staples = [], sides = [];
 
   if (meal.itemType === 'main') {
-    staple = pickStaple(meal, presentIds);
-    if (staple) {
-      score += staple.score * WEIGHT.staple * prefMult + staple.compat;
-      const s = byId(staple.id);
-      parts.push({ id: s.id, name: s.name, levels: staple.levels, role: 'staple' });
-      allLevels = allLevels.concat(Object.values(staple.levels));
-    }
+    staples = pickStaples(meal, presentIds);
+    staples.forEach(st => {
+      score += st.score * WEIGHT.staple * prefMult + st.compat;
+      const s = byId(st.id);
+      parts.push({ id: s.id, name: s.name, levels: st.levels, role: 'staple' });
+      allLevels = allLevels.concat(Object.values(st.levels));
+    });
     sides = pickSides(meal, presentIds);
     sides.forEach(sd => {
       score += sd.score * WEIGHT.side * prefMult;
@@ -154,7 +170,7 @@ function buildSuggestion(meal, presentIds, filters, tuning) {
     id: meal.id, meal,
     displayName: parts.map(p => p.name).join(' + '),
     parts, main: parts[0],
-    staple: staple ? byId(staple.id) : null,
+    staples: staples.map(s => byId(s.id)),
     sides: sides.map(s => byId(s.id)),
     score: Math.round(score * 10) / 10,
     baseScore: mainC.score, penalty, filterBonus, noConflict,
